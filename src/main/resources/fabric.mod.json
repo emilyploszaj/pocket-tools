@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "pockettools",
+  "version": "1.0.0",
+  "name": "Pocket Tools",
+  "description": "Tools you can fit in your pocket",
+  "authors": [
+    "Emi"
+  ],
+  "contributors": [],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/pockettools/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "dev.emi.pockettools.PocketToolsMain"
+    ],
+    "client": [],
+    "server": []
+  },
+  "mixins": [
+	  "pockettools.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.10.6"
+  }
+}

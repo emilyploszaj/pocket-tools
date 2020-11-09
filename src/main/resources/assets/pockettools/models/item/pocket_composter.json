@@ -1,0 +1,20 @@
+{
+	"parent": "item/generated",
+	"textures": {
+		"layer0": "pockettools:item/pocket_composter"
+	},
+	"overrides": [
+		{
+			"predicate": {
+				"custom_model_data": 1
+			},
+			"model": "pockettools:item/filled_pocket_composter"
+		},
+		{
+			"predicate": {
+				"custom_model_data": 2
+			},
+			"model": "pockettools:item/ready_pocket_composter"
+		}
+	]
+}

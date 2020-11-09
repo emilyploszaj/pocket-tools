@@ -1,0 +1,14 @@
+{
+	"parent": "item/generated",
+	"textures": {
+		"layer0": "pockettools:item/pocket_blast_furnace"
+	},
+	"overrides": [
+		{
+			"predicate": {
+				"custom_model_data": 1
+			},
+			"model": "pockettools:item/burning_pocket_blast_furnace"
+		}
+	]
+}

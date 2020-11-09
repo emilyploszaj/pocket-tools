@@ -1,0 +1,14 @@
+{
+	"required": true,
+	"package": "dev.emi.pockettools.mixin",
+	"compatibilityLevel": "JAVA_8",
+	"mixins": [
+		"SlotMixin",
+		"ScreenHandlerMixin"
+	],
+	"client": [
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

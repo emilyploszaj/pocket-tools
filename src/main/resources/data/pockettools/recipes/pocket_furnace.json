@@ -1,0 +1,20 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"S",
+		"C",
+		"S"
+	],
+	"key": {
+		"S": {
+			"item": "minecraft:cobblestone_slab"
+		},
+		"C": {
+			"item": "minecraft:furnace"
+		}
+	},
+	"result": {
+		"item": "pockettools:pocket_furnace",
+		"count": 1
+	}
+}

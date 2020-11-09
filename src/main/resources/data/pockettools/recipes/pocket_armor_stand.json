@@ -1,0 +1,20 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"S",
+		"C",
+		"S"
+	],
+	"key": {
+		"S": {
+			"tag": "minecraft:wooden_slabs"
+		},
+		"C": {
+			"item": "minecraft:armor_stand"
+		}
+	},
+	"result": {
+		"item": "pockettools:pocket_armor_stand",
+		"count": 1
+	}
+}

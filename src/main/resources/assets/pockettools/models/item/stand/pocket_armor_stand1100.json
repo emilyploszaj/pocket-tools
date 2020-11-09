@@ -1,0 +1,8 @@
+{
+	"parent": "item/generated",
+	"textures": {
+		"layer0": "pockettools:item/pocket_armor_stand",
+		"layer1": "pockettools:item/pocket_armor_stand_boots",
+		"layer2": "pockettools:item/pocket_armor_stand_leggings"
+	}
+}

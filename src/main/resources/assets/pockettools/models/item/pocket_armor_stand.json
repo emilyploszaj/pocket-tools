@@ -1,0 +1,104 @@
+{
+	"parent": "item/generated",
+	"textures": {
+		"layer0": "pockettools:item/pocket_armor_stand"
+	},
+	"overrides": [
+		{
+			"predicate": {
+				"custom_model_data": 0
+			},
+			"model": "pockettools:item/stand/pocket_armor_stand0000"
+		},
+		{
+			"predicate": {
+				"custom_model_data": 1
+			},
+			"model": "pockettools:item/stand/pocket_armor_stand0001"
+		},
+		{
+			"predicate": {
+				"custom_model_data": 2
+			},
+			"model": "pockettools:item/stand/pocket_armor_stand0010"
+		},
+		{
+			"predicate": {
+				"custom_model_data": 3
+			},
+			"model": "pockettools:item/stand/pocket_armor_stand0011"
+		},
+		{
+			"predicate": {
+				"custom_model_data": 4
+			},
+			"model": "pockettools:item/stand/pocket_armor_stand0100"
+		},
+		{
+			"predicate": {
+				"custom_model_data": 5
+			},
+			"model": "pockettools:item/stand/pocket_armor_stand0101"
+		},
+		{
+			"predicate": {
+				"custom_model_data": 6
+			},
+			"model": "pockettools:item/stand/pocket_armor_stand0110"
+		},
+		{
+			"predicate": {
+				"custom_model_data": 7
+			},
+			"model": "pockettools:item/stand/pocket_armor_stand0111"
+		},
+		{
+			"predicate": {
+				"custom_model_data": 8
+			},
+			"model": "pockettools:item/stand/pocket_armor_stand1000"
+		},
+		{
+			"predicate": {
+				"custom_model_data": 9
+			},
+			"model": "pockettools:item/stand/pocket_armor_stand1001"
+		},
+		{
+			"predicate": {
+				"custom_model_data": 10
+			},
+			"model": "pockettools:item/stand/pocket_armor_stand1010"
+		},
+		{
+			"predicate": {
+				"custom_model_data": 11
+			},
+			"model": "pockettools:item/stand/pocket_armor_stand1011"
+		},
+		{
+			"predicate": {
+				"custom_model_data": 12
+			},
+			"model": "pockettools:item/stand/pocket_armor_stand1100"
+		},
+		{
+			"predicate": {
+				"custom_model_data": 13
+			},
+			"model": "pockettools:item/stand/pocket_armor_stand1101"
+		},
+		{
+			"predicate": {
+				"custom_model_data": 14
+			},
+			"model": "pockettools:item/stand/pocket_armor_stand1110"
+		},
+		{
+			"predicate": {
+				"custom_model_data": 15
+			},
+			"model": "pockettools:item/stand/pocket_armor_stand1111"
+		}
+	]
+}

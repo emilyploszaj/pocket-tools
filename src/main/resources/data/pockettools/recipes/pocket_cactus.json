@@ -1,0 +1,19 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"C",
+		"P"
+	],
+	"key": {
+		"C": {
+			"item": "minecraft:cactus"
+		},
+		"P": {
+			"item": "minecraft:flower_pot"
+		}
+	},
+	"result": {
+		"item": "pockettools:pocket_cactus",
+		"count": 1
+	}
+}
