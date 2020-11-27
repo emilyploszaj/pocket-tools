@@ -14,6 +14,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.MusicDiscItem;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.screen.slot.Slot;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.MutableText;
@@ -59,7 +60,7 @@ public class PocketJukebox extends Item {
 	}
 
 	@Override
-	public boolean onClicked(ItemStack self, ItemStack stack, ClickType clickType, PlayerInventory playerInventory) {
+	public boolean onClicked(ItemStack self, ItemStack stack, Slot slot, ClickType clickType, PlayerInventory playerInventory) {
 		CompoundTag tag = self.getOrCreateTag();
 		if (clickType == ClickType.RIGHT) {
 			PlayerEntity player = playerInventory.player;

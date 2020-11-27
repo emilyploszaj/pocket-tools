@@ -10,6 +10,7 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.screen.slot.Slot;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Style;
@@ -30,7 +31,7 @@ public class PocketNoteBlock extends Item {
 	}
 	
 	@Override
-	public boolean onClicked(ItemStack self, ItemStack stack, ClickType clickType, PlayerInventory playerInventory) {
+	public boolean onClicked(ItemStack self, ItemStack stack, Slot slot, ClickType clickType, PlayerInventory playerInventory) {
 		CompoundTag tag = self.getOrCreateTag();
 		if (clickType == ClickType.RIGHT) {
 			if (stack.isEmpty()) {

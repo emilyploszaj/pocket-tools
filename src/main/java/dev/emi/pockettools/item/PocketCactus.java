@@ -4,6 +4,7 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.ClickType;
 
 public class PocketCactus extends Item {
@@ -13,7 +14,7 @@ public class PocketCactus extends Item {
 	}
 	
 	@Override
-	public boolean onClicked(ItemStack self, ItemStack stack, ClickType clickType, PlayerInventory playerInventory) {
+	public boolean onClicked(ItemStack self, ItemStack stack, Slot slot, ClickType clickType, PlayerInventory playerInventory) {
 		if (clickType == ClickType.RIGHT) {
 			if (stack.isEmpty()) {
 				playerInventory.player.damage(DamageSource.CACTUS, 1f);
@@ -26,7 +27,8 @@ public class PocketCactus extends Item {
 	}
 
 	@Override
-	public boolean onStackClicked(ItemStack self, ItemStack stack, ClickType clickType, PlayerInventory playerInventory) {
+	public boolean onStackClicked(ItemStack self, Slot slot, ClickType clickType, PlayerInventory playerInventory) {
+		ItemStack stack = slot.getStack();
 		if (clickType == ClickType.RIGHT) {
 			if (!stack.isEmpty()) {
 				stack.setCount(0);

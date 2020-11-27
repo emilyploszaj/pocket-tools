@@ -7,6 +7,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -38,7 +39,7 @@ public class PocketEndPortal extends Item {
 	}
 	
 	@Override
-	public boolean onClicked(ItemStack self, ItemStack stack, ClickType clickType, PlayerInventory playerInventory) {
+	public boolean onClicked(ItemStack self, ItemStack stack, Slot slot, ClickType clickType, PlayerInventory playerInventory) {
 		CompoundTag tag = self.getOrCreateTag();
 		PlayerEntity player = playerInventory.player;
 		World world = player.world;
@@ -64,6 +65,7 @@ public class PocketEndPortal extends Item {
 					if (world.isClient) {
 						player.playSound(SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.BLOCKS, 1f, player.getRandom().nextFloat() * 0.1f + 0.9f);
 					}
+					return true;
 				}
 			} else {
 				if (stack.getItem() == Items.ENDER_EYE) {

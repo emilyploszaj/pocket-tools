@@ -11,6 +11,7 @@ import dev.emi.pockettools.item.PocketFurnace;
 import dev.emi.pockettools.item.PocketGrindstone;
 import dev.emi.pockettools.item.PocketJukebox;
 import dev.emi.pockettools.item.PocketNoteBlock;
+import dev.emi.pockettools.item.PocketStonecutter;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.minecraft.client.color.item.ItemColorProvider;
@@ -45,6 +46,7 @@ public class PocketToolsMain implements ModInitializer {
 	public static final Item POCKET_JUKEBOX = new PocketJukebox(new Item.Settings().maxCount(1));
 	public static final Item POCKET_ARMOR_STAND = new PocketArmorStand(new Item.Settings().maxCount(1));
 	public static final Item POCKET_CACTUS = new PocketCactus(new Item.Settings().maxCount(1));
+	public static final Item POCKET_STONECUTTER = new PocketStonecutter(new Item.Settings().maxCount(1));
 
 	@Override
 	public void onInitialize() {
@@ -73,6 +75,7 @@ public class PocketToolsMain implements ModInitializer {
 		Registry.register(Registry.ITEM, new Identifier("pockettools", "pocket_jukebox"), POCKET_JUKEBOX);
 		Registry.register(Registry.ITEM, new Identifier("pockettools", "pocket_armor_stand"), POCKET_ARMOR_STAND);
 		Registry.register(Registry.ITEM, new Identifier("pockettools", "pocket_cactus"), POCKET_CACTUS);
+		Registry.register(Registry.ITEM, new Identifier("pockettools", "pocket_stonecutter"), POCKET_STONECUTTER);
 		ColorProviderRegistry.ITEM.register(new ItemColorProvider() {
 
 			@Override

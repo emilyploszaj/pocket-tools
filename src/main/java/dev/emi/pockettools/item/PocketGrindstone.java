@@ -12,6 +12,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.screen.AnvilScreenHandler;
+import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ClickType;
 import net.minecraft.world.World;
@@ -23,13 +24,12 @@ public class PocketGrindstone extends Item {
 	}
 	
 	@Override
-	public boolean onClicked(ItemStack stack, ItemStack applied, ClickType arg, PlayerInventory playerInventory) {
-		if (arg == ClickType.RIGHT && (applied.hasEnchantments() || applied.itemMatches(Items.ENCHANTED_BOOK))) {
+	public boolean onClicked(ItemStack stack, ItemStack applied, Slot slot, ClickType arg, PlayerInventory playerInventory) {
+		if (arg == ClickType.RIGHT && (applied.hasEnchantments() || applied.isOf(Items.ENCHANTED_BOOK))) {
 			World world = playerInventory.player.world;
 			if (!world.isClient) {
 				ExperienceOrbEntity.method_31493((ServerWorld) world, playerInventory.player.getPos(), getExperience(applied, world));
 			}
-			System.out.println(getExperience(applied, world));
 			playerInventory.setCursorStack(grind(applied));
 			world.syncWorldEvent(1042, playerInventory.player.getBlockPos(), 0);
 			return true;
@@ -47,7 +47,7 @@ public class PocketGrindstone extends Item {
 		}).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 		EnchantmentHelper.set(map, stack);
 		stack.setRepairCost(0);
-		if (stack.itemMatches(Items.ENCHANTED_BOOK) && map.size() == 0) {
+		if (stack.isOf(Items.ENCHANTED_BOOK) && map.size() == 0) {
 			stack = new ItemStack(Items.BOOK);
 			if (copy.hasCustomName()) {
 				stack.setCustomName(copy.getName());

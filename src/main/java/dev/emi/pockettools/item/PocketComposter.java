@@ -7,6 +7,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.screen.slot.Slot;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.ClickType;
@@ -75,7 +76,7 @@ public class PocketComposter extends Item {
 	}
 	
 	@Override
-	public boolean onClicked(ItemStack stack, ItemStack applied, ClickType arg, PlayerInventory playerInventory) {
+	public boolean onClicked(ItemStack stack, ItemStack applied, Slot slot, ClickType arg, PlayerInventory playerInventory) {
 		if (arg == ClickType.RIGHT) {
 			World world = playerInventory.player.world;
 			CompoundTag tag = stack.getOrCreateTag();

@@ -3,10 +3,10 @@
 	"package": "dev.emi.pockettools.mixin",
 	"compatibilityLevel": "JAVA_8",
 	"mixins": [
-		"SlotMixin",
-		"ScreenHandlerMixin"
+		"SlotMixin"
 	],
 	"client": [
+		"ScreenMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

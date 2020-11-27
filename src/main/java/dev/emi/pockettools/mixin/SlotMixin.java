@@ -27,7 +27,9 @@ public abstract class SlotMixin {
 		if (stack.getItem() == PocketToolsMain.POCKET_END_PORTAL && stack.hasTag()) {
 			CompoundTag tag = stack.getTag();
 			if ((tag.contains("portal") && tag.getBoolean("portal")) || (tag.contains("filled") && tag.getBoolean("filled"))) {
-				info.setReturnValue(false);
+				if (!player.isCreative()) {
+					info.setReturnValue(false);
+				}
 			}
 		}
 	}
