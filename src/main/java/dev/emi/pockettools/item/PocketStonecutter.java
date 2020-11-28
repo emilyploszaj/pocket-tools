@@ -13,9 +13,9 @@ import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.item.TooltipData;
 import net.minecraft.client.render.VertexConsumerProvider.Immediate;
 import net.minecraft.client.render.item.ItemRenderer;
-import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.texture.TextureManager;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.Item;
@@ -38,7 +38,8 @@ public class PocketStonecutter extends Item {
 
 	@Override
 	public boolean onClicked(ItemStack self, ItemStack stack, Slot slot, ClickType clickType, PlayerInventory playerInventory) {
-		World world = playerInventory.player.world;
+		PlayerEntity player = playerInventory.player;
+		World world = player.world;
 		CompoundTag tag = self.getOrCreateTag();
 		if (clickType == ClickType.RIGHT) {
 			if (stack.isEmpty()) {
@@ -55,7 +56,7 @@ public class PocketStonecutter extends Item {
 					}
 					tag.putInt("offset", offset);
 					if (world.isClient) {
-						MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_STONECUTTER_SELECT_RECIPE, 1.0F));
+						world.playSound(player, player.getBlockPos(), SoundEvents.UI_STONECUTTER_SELECT_RECIPE, SoundCategory.BLOCKS, 1.0F, 1.0F);
 					}
 					return true;
 				}
@@ -65,7 +66,7 @@ public class PocketStonecutter extends Item {
 					tag.put("base", stack.toTag(new CompoundTag()));
 					tag.putInt("offset", 0);
 					if (world.isClient) {
-						MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_STONECUTTER_SELECT_RECIPE, 1.0F));
+						world.playSound(player, player.getBlockPos(), SoundEvents.UI_STONECUTTER_SELECT_RECIPE, SoundCategory.BLOCKS, 1.0F, 1.0F);
 					}
 					return true;
 				}

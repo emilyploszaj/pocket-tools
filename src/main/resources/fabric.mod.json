@@ -16,7 +16,9 @@
     "main": [
       "dev.emi.pockettools.PocketToolsMain"
     ],
-    "client": [],
+    "client": [
+      "dev.emi.pockettools.PocketToolsClient"
+	],
     "server": []
   },
   "mixins": [

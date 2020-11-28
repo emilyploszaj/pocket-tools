@@ -33,8 +33,7 @@ public class PocketArmorStand extends Item {
 	}
 
 	@Override
-	public boolean onClicked(ItemStack self, ItemStack stack, Slot slot, ClickType clickType,
-			PlayerInventory playerInventory) {
+	public boolean onClicked(ItemStack self, ItemStack stack, Slot slot, ClickType clickType, PlayerInventory playerInventory) {
 		PlayerEntity player = playerInventory.player;
 		World world = player.world;
 		CompoundTag tag = self.getOrCreateTag();
@@ -42,44 +41,14 @@ public class PocketArmorStand extends Item {
 			if (stack.isEmpty()) {
 				dumpArmor(tag, playerInventory);
 				if (world.isClient) {
-					world.playSound(player, player.getBlockPos(), SoundEvents.ITEM_ARMOR_EQUIP_GENERIC,
-							SoundCategory.PLAYERS, 1.0f, 1.0f);
+					world.playSound(player, player.getBlockPos(), SoundEvents.ITEM_ARMOR_EQUIP_GENERIC, SoundCategory.PLAYERS, 1.0f, 1.0f);
 				}
 				return true;
 			} else {
 				EquipmentSlot es = MobEntity.method_32326(stack);
 				if (es != EquipmentSlot.MAINHAND && es != EquipmentSlot.OFFHAND) {
-					String name = es.getName();
-					ItemStack inner = ItemStack.EMPTY;
-					if (tag.contains(name)) {
-						inner = ItemStack.fromTag(tag.getCompound(name));
-					}
-					if (world.isClient) {
-						if (stack.getItem() instanceof ArmorItem) {
-							ArmorMaterial material = ((ArmorItem) stack.getItem()).getMaterial();
-							world.playSound(player, player.getBlockPos(), material.getEquipSound(),
-									SoundCategory.PLAYERS, 1.0f, 1.0f);
-						} else {
-							world.playSound(player, player.getBlockPos(), SoundEvents.ITEM_ARMOR_EQUIP_GENERIC,
-									SoundCategory.PLAYERS, 1.0f, 1.0f);
-						}
-					}
-					tag.put(name, stack.toTag(new CompoundTag()));
+					ItemStack inner = swapArmor(self, stack, es, tag, player);
 					playerInventory.setCursorStack(inner);
-					int mask = 0;
-					if (tag.contains("head")) {
-						mask |= 1;
-					}
-					if (tag.contains("chest")) {
-						mask |= 2;
-					}
-					if (tag.contains("legs")) {
-						mask |= 4;
-					}
-					if (tag.contains("feet")) {
-						mask |= 8;
-					}
-					tag.putInt("CustomModelData", mask);
 					return true;
 				}
 			}
@@ -88,8 +57,66 @@ public class PocketArmorStand extends Item {
 	}
 
 	@Override
+	public boolean onStackClicked(ItemStack self, Slot slot, ClickType clickType, PlayerInventory playerInventory) {
+		ItemStack stack = slot.getStack();
+		PlayerEntity player = playerInventory.player;
+		CompoundTag tag = self.getOrCreateTag();
+		if (slot.canTakeItems(player) && clickType == ClickType.RIGHT) {
+			EquipmentSlot es = MobEntity.method_32326(stack);
+			if (es != EquipmentSlot.MAINHAND && es != EquipmentSlot.OFFHAND) {
+				String name = es.getName();
+				ItemStack inner = ItemStack.EMPTY;
+				if (tag.contains(name)) {
+					inner = ItemStack.fromTag(tag.getCompound(name));
+				}
+				if (slot.canInsert(inner) || inner.isEmpty()) {
+					inner = swapArmor(self, stack, es, tag, player);
+					slot.setStack(inner);
+					return true;
+				}
+			}
+		}
+		return super.onStackClicked(self, slot, clickType, playerInventory);
+	}
+
+	@Override
 	public Optional<TooltipData> getTooltipData(ItemStack stack) {
 		return Optional.of(new PocketArmorStandTooltip(stack));
+	}
+
+	private ItemStack swapArmor(ItemStack self, ItemStack stack, EquipmentSlot es, CompoundTag tag, PlayerEntity player) {
+		World world = player.world;
+		String name = es.getName();
+		ItemStack inner = ItemStack.EMPTY;
+		if (tag.contains(name)) {
+			inner = ItemStack.fromTag(tag.getCompound(name));
+		}
+		if (world.isClient) {
+			if (stack.getItem() instanceof ArmorItem) {
+				ArmorMaterial material = ((ArmorItem) stack.getItem()).getMaterial();
+				world.playSound(player, player.getBlockPos(), material.getEquipSound(),
+						SoundCategory.PLAYERS, 1.0f, 1.0f);
+			} else {
+				world.playSound(player, player.getBlockPos(), SoundEvents.ITEM_ARMOR_EQUIP_GENERIC,
+						SoundCategory.PLAYERS, 1.0f, 1.0f);
+			}
+		}
+		tag.put(name, stack.toTag(new CompoundTag()));
+		int mask = 0;
+		if (tag.contains("head")) {
+			mask |= 1;
+		}
+		if (tag.contains("chest")) {
+			mask |= 2;
+		}
+		if (tag.contains("legs")) {
+			mask |= 4;
+		}
+		if (tag.contains("feet")) {
+			mask |= 8;
+		}
+		tag.putInt("CustomModelData", mask);
+		return inner;
 	}
 
 	private void dumpArmor(CompoundTag tag, PlayerInventory playerInventory) {

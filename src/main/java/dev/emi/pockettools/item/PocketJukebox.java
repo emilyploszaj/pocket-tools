@@ -3,10 +3,8 @@ package dev.emi.pockettools.item;
 import java.util.List;
 import java.util.UUID;
 
-import dev.emi.pockettools.PocketToolsMain;
-import net.minecraft.client.MinecraftClient;
+import dev.emi.pockettools.sound.PocketRecordSoundInstance;
 import net.minecraft.client.item.TooltipContext;
-import net.minecraft.client.sound.EntityTrackingSoundInstance;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -16,7 +14,6 @@ import net.minecraft.item.MusicDiscItem;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.ClickType;
@@ -24,9 +21,6 @@ import net.minecraft.util.Formatting;
 import net.minecraft.world.World;
 
 public class PocketJukebox extends Item {
-	private PocketRecordSoundInstance inst;
-	private UUID activeUuid;
-	private int lastCheckin;
 
 	public PocketJukebox(Settings settings) {
 		super(settings);
@@ -38,19 +32,19 @@ public class PocketJukebox extends Item {
 		if (world.isClient) {
 			if (tag.contains("start") && tag.getInt("start") >= 1) {
 				if (tag.contains("disc") && tag.contains("uuid") && entity instanceof PlayerEntity) {
-					activeUuid = tag.getUuid("uuid");
-					if (inst != null && !inst.isDone()) {
-						inst.end();
+					PocketRecordSoundInstance.activeUuid = tag.getUuid("uuid");
+					if (PocketRecordSoundInstance.inst != null && !PocketRecordSoundInstance.inst.isDone()) {
+						PocketRecordSoundInstance.inst.end();
 					}
 					ItemStack d = ItemStack.fromTag(tag.getCompound("disc"));
 					MusicDiscItem disc = (MusicDiscItem) d.getItem();
-					inst = new PocketRecordSoundInstance(disc.getSound(), SoundCategory.RECORDS, (PlayerEntity) entity);
-					MinecraftClient.getInstance().getSoundManager().play(inst);
-					lastCheckin = 5;
+					PocketRecordSoundInstance.inst = new PocketRecordSoundInstance(disc.getSound(), SoundCategory.RECORDS, (PlayerEntity) entity);
+					PocketRecordSoundInstance.inst.start();
+					PocketRecordSoundInstance.lastCheckin = 5;
 				}
 			}
-			if (tag.contains("uuid") && tag.getUuid("uuid").equals(activeUuid) && !inst.isDone()) {
-				lastCheckin = 5;
+			if (tag.contains("uuid") && tag.getUuid("uuid").equals(PocketRecordSoundInstance.activeUuid) && !PocketRecordSoundInstance.inst.isDone()) {
+				PocketRecordSoundInstance.lastCheckin = 5;
 			}
 		} else {
 			if (tag.contains("start") && tag.getInt("start") > 0) {
@@ -69,8 +63,8 @@ public class PocketJukebox extends Item {
 				if (stack.isEmpty()) {
 					playerInventory.setCursorStack(ItemStack.fromTag(tag.getCompound("disc")));
 					if (world.isClient) {
-						if (tag.contains("uuid") && tag.getUuid("uuid").equals(activeUuid) && inst != null && !inst.isDone()) {
-							inst.end();
+						if (tag.contains("uuid") && tag.getUuid("uuid").equals(PocketRecordSoundInstance.activeUuid) && PocketRecordSoundInstance.inst != null && !PocketRecordSoundInstance.inst.isDone()) {
+							PocketRecordSoundInstance.inst.end();
 						}
 					}
 					tag.remove("start");
@@ -110,34 +104,6 @@ public class PocketJukebox extends Item {
 				text = text.formatted(Formatting.GRAY);
 			//}
 			tooltip.add(text);
-		}
-	}
-	
-	class PocketRecordSoundInstance extends EntityTrackingSoundInstance {
-		private final PlayerEntity e;
-		
-		public PocketRecordSoundInstance(SoundEvent sound, SoundCategory soundCategory, PlayerEntity entity) {
-			super(sound, soundCategory, entity);
-			e = entity;
-		}
-		
-		public void end() {
-			setDone();
-		}
-		
-		@Override
-		public void tick() {
-			super.tick();
-			if (lastCheckin < 0) {
-				end();
-			}
-			ItemStack stack = ((PlayerEntity) e).getInventory().getCursorStack();
-			CompoundTag tag = stack.getOrCreateTag();
-			if (stack.getItem() == PocketToolsMain.POCKET_JUKEBOX && tag.contains("uuid") && tag.getUuid("uuid").equals(activeUuid)) {
-				lastCheckin = 5;
-			} else {
-				lastCheckin--;
-			}
 		}
 	}
 }
