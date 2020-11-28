@@ -18,14 +18,14 @@
     ],
     "client": [
       "dev.emi.pockettools.PocketToolsClient"
-	],
+    ],
     "server": []
   },
   "mixins": [
-	  "pockettools.mixins.json"
+      "pockettools.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.10.6",
-	"fabric": "*"
+    "fabric": "*"
   }
 }
