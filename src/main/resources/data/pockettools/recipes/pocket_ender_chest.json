@@ -1,0 +1,20 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern": [
+		"SSS",
+		" C ",
+		"SSS"
+	],
+	"key": {
+		"S": {
+			"item": "minecraft:obsidian"
+		},
+		"C": {
+			"item": "minecraft:ender_chest"
+		}
+	},
+	"result": {
+		"item": "pockettools:pocket_ender_chest",
+		"count": 1
+	}
+}
