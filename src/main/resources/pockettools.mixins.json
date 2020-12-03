@@ -3,7 +3,8 @@
 	"package": "dev.emi.pockettools.mixin",
 	"compatibilityLevel": "JAVA_8",
 	"mixins": [
-		"SlotMixin"
+		"SlotMixin",
+		"ItemEntityMixin"
 	],
 	"client": [
 		"ScreenMixin"

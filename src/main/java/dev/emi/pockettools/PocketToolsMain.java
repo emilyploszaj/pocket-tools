@@ -11,7 +11,10 @@ import dev.emi.pockettools.item.PocketJukebox;
 import dev.emi.pockettools.item.PocketNoteBlock;
 import dev.emi.pockettools.item.PocketStonecutter;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.BlastingRecipe;
 import net.minecraft.recipe.RecipeType;
 import net.minecraft.recipe.SmeltingRecipe;
@@ -21,18 +24,22 @@ import net.minecraft.util.registry.Registry;
 
 public class PocketToolsMain implements ModInitializer {
 
-	public static final Item POCKET_FURNACE = new PocketFurnace<SmeltingRecipe>(RecipeType.SMELTING, new Item.Settings().maxCount(1));
-	public static final Item POCKET_BLAST_FURNACE = new PocketFurnace<BlastingRecipe>(RecipeType.BLASTING, new Item.Settings().maxCount(1));
-	public static final Item POCKET_SMOKER = new PocketFurnace<SmokingRecipe>(RecipeType.SMOKING, new Item.Settings().maxCount(1));
-	public static final Item POCKET_GRINDSTONE = new PocketGrindstone(new Item.Settings().maxCount(1));
-	public static final Item POCKET_COMPOSTER = new PocketComposter(new Item.Settings().maxCount(1));
-	public static final Item POCKET_END_PORTAL = new PocketEndPortal(new Item.Settings().maxCount(1));
-	public static final Item POCKET_NOTE_BLOCK = new PocketNoteBlock(new Item.Settings().maxCount(1));
-	public static final Item POCKET_JUKEBOX = new PocketJukebox(new Item.Settings().maxCount(1));
-	public static final Item POCKET_ARMOR_STAND = new PocketArmorStand(new Item.Settings().maxCount(1));
-	public static final Item POCKET_CACTUS = new PocketCactus(new Item.Settings().maxCount(1));
-	public static final Item POCKET_STONECUTTER = new PocketStonecutter(new Item.Settings().maxCount(1));
-	public static final Item POCKET_ENDER_CHEST = new PocketEnderChest(new Item.Settings().maxCount(1));
+	public static final ItemGroup POCKET_GROUP = FabricItemGroupBuilder.build(new Identifier("pockettools", "pockettools"), () -> {
+		return new ItemStack(PocketToolsMain.POCKET_CACTUS);
+	});
+		
+	public static final Item POCKET_FURNACE = new PocketFurnace<SmeltingRecipe>(RecipeType.SMELTING, new Item.Settings().maxCount(1).group(POCKET_GROUP));
+	public static final Item POCKET_BLAST_FURNACE = new PocketFurnace<BlastingRecipe>(RecipeType.BLASTING, new Item.Settings().maxCount(1).group(POCKET_GROUP));
+	public static final Item POCKET_SMOKER = new PocketFurnace<SmokingRecipe>(RecipeType.SMOKING, new Item.Settings().maxCount(1).group(POCKET_GROUP));
+	public static final Item POCKET_GRINDSTONE = new PocketGrindstone(new Item.Settings().maxCount(1).group(POCKET_GROUP));
+	public static final Item POCKET_COMPOSTER = new PocketComposter(new Item.Settings().maxCount(1).group(POCKET_GROUP));
+	public static final Item POCKET_END_PORTAL = new PocketEndPortal(new Item.Settings().maxCount(1).group(POCKET_GROUP));
+	public static final Item POCKET_NOTE_BLOCK = new PocketNoteBlock(new Item.Settings().maxCount(1).group(POCKET_GROUP));
+	public static final Item POCKET_JUKEBOX = new PocketJukebox(new Item.Settings().maxCount(1).group(POCKET_GROUP));
+	public static final Item POCKET_ARMOR_STAND = new PocketArmorStand(new Item.Settings().maxCount(1).group(POCKET_GROUP));
+	public static final Item POCKET_CACTUS = new PocketCactus(new Item.Settings().maxCount(1).group(POCKET_GROUP));
+	public static final Item POCKET_STONECUTTER = new PocketStonecutter(new Item.Settings().maxCount(1).group(POCKET_GROUP));
+	public static final Item POCKET_ENDER_CHEST = new PocketEnderChest(new Item.Settings().maxCount(1).group(POCKET_GROUP));
 
 	@Override
 	public void onInitialize() {

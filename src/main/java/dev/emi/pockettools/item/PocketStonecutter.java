@@ -1,5 +1,6 @@
 package dev.emi.pockettools.item;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -128,7 +129,7 @@ public class PocketStonecutter extends Item {
 	}
 
 	class PocketStonecutterTooltip implements ConvertibleTooltipData, TooltipComponent {
-		public List<StonecuttingRecipe> list = List.of();
+		public List<StonecuttingRecipe> list = new ArrayList<StonecuttingRecipe>();
 		public ItemStack stack;
 
 		public PocketStonecutterTooltip(ItemStack stack) {
