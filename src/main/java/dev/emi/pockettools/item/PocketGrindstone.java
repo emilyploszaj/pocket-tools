@@ -28,7 +28,7 @@ public class PocketGrindstone extends Item {
 		if (arg == ClickType.RIGHT && (applied.hasEnchantments() || applied.isOf(Items.ENCHANTED_BOOK))) {
 			World world = playerInventory.player.world;
 			if (!world.isClient) {
-				ExperienceOrbEntity.method_31493((ServerWorld) world, playerInventory.player.getPos(), getExperience(applied, world));
+				ExperienceOrbEntity.spawn((ServerWorld) world, playerInventory.player.getPos(), getExperience(applied, world));
 			}
 			playerInventory.setCursorStack(grind(applied));
 			world.syncWorldEvent(1042, playerInventory.player.getBlockPos(), 0);
