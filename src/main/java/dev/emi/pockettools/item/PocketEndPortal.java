@@ -3,10 +3,11 @@ package dev.emi.pockettools.item;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.StackReference;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -23,9 +24,9 @@ public class PocketEndPortal extends Item {
 
 	@Override
 	public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-		CompoundTag tag = stack.getOrCreateTag();
-		if (tag.contains("tp") && tag.getBoolean("tp")) {
-			tag.remove("tp");
+		var nbt = stack.getOrCreateTag();
+		if (nbt.contains("tp") && nbt.getBoolean("tp")) {
+			nbt.remove("tp");
 			// This has to happen in a tick so that there is no teleportation in the middle of a handled event
 			if (world instanceof ServerWorld && !entity.hasVehicle() && !entity.hasPassengers() && entity.canUsePortals()) {
 				RegistryKey<World> registryKey = world.getRegistryKey() == World.END ? World.OVERWORLD : World.END;
@@ -39,29 +40,28 @@ public class PocketEndPortal extends Item {
 	}
 	
 	@Override
-	public boolean onClicked(ItemStack self, ItemStack stack, Slot slot, ClickType clickType, PlayerInventory playerInventory) {
-		CompoundTag tag = self.getOrCreateTag();
-		PlayerEntity player = playerInventory.player;
-		World world = player.world;
+	public boolean onClicked(ItemStack self, ItemStack stack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursor) {
+		var nbt = self.getOrCreateTag();
+		var world = player.world;
 		if (clickType == ClickType.RIGHT) {
-			if (tag.contains("portal") && tag.getBoolean("portal")) {
+			if (nbt.contains("portal") && nbt.getBoolean("portal")) {
 				if (!world.isClient) {
 					// See inventoryTick
-					tag.putBoolean("tp", true);
+					nbt.putBoolean("tp", true);
 				}
 				return true;
 			}
-			if (tag.contains("filled") && tag.getBoolean("filled")) {
+			if (nbt.contains("filled") && nbt.getBoolean("filled")) {
 				if (stack.isEmpty() || (stack.getItem() == Items.ENDER_EYE && stack.getCount() < stack.getMaxCount())) {
-					boolean brokePortal = breakPortal(self, playerInventory);
-					tag.remove("filled");
-					tag.remove("CustomModelData");
+					boolean brokePortal = breakPortal(self, player.getInventory());
+					nbt.remove("filled");
+					nbt.remove("CustomModelData");
 					if (brokePortal) {
 						if (world.isClient) {
 							player.playSound(SoundEvents.BLOCK_GLASS_BREAK, SoundCategory.BLOCKS, 1f, player.getRandom().nextFloat() * 0.1f + 0.9f);
 						}
 					}
-					playerInventory.setCursorStack(new ItemStack(Items.ENDER_EYE, stack.getCount() + 1));
+					cursor.set(new ItemStack(Items.ENDER_EYE, stack.getCount() + 1));
 					if (world.isClient) {
 						player.playSound(SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.BLOCKS, 1f, player.getRandom().nextFloat() * 0.1f + 0.9f);
 					}
@@ -70,12 +70,13 @@ public class PocketEndPortal extends Item {
 			} else {
 				if (stack.getItem() == Items.ENDER_EYE) {
 					stack.decrement(1);
-					tag.putBoolean("filled", true);
-					tag.putInt("CustomModelData", 1);
-					self.setTag(tag);
+					nbt.putBoolean("filled", true);
+					nbt.putInt("CustomModelData", 1);
+					self.setTag(nbt);
 					if (world.isClient) {
 						player.playSound(SoundEvents.BLOCK_END_PORTAL_FRAME_FILL, SoundCategory.BLOCKS, 1f, player.getRandom().nextFloat() * 0.1f + 0.9f);
-					}	
+					}
+					var playerInventory = player.getInventory();
 					for (int i = 19; i < 26; i++) {
 						if (isLitPortal(playerInventory.getStack(i))) continue;
 						if (!isFilledPortal(playerInventory.getStack(i - 1))) continue;
@@ -147,11 +148,11 @@ public class PocketEndPortal extends Item {
 
 	public void fillPortal(int i, PlayerInventory playerInventory) {
 		ItemStack temp = playerInventory.getStack(i);
-		ItemStack stack = new ItemStack(this);
-		CompoundTag tag = new CompoundTag();
-		tag.putBoolean("portal", true);
-		tag.putInt("CustomModelData", 2);
-		stack.setTag(tag);
+		var stack = new ItemStack(this);
+		var nbt = new NbtCompound();
+		nbt.putBoolean("portal", true);
+		nbt.putInt("CustomModelData", 2);
+		stack.setTag(nbt);
 		playerInventory.setStack(i, stack);
 		playerInventory.offerOrDrop(temp);
 		if (playerInventory.player.world.isClient) {

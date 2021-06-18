@@ -1,7 +1,6 @@
 package dev.emi.pockettools.item;
 
-import java.util.Optional;
-
+import com.mojang.blaze3d.systems.RenderSystem;
 import dev.emi.pockettools.tooltip.ConvertibleTooltipData;
 import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.client.font.TextRenderer;
@@ -12,11 +11,12 @@ import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.texture.TextureManager;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.SimpleInventory;
+import net.minecraft.inventory.StackReference;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.recipe.AbstractCookingRecipe;
 import net.minecraft.recipe.RecipeType;
 import net.minecraft.screen.slot.Slot;
@@ -24,6 +24,8 @@ import net.minecraft.util.ClickType;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+
+import java.util.Optional;
 
 public class PocketFurnace<T extends AbstractCookingRecipe> extends Item {
 	private RecipeType<T> type;
@@ -35,10 +37,10 @@ public class PocketFurnace<T extends AbstractCookingRecipe> extends Item {
 
 	@Override
 	public boolean isItemBarVisible(ItemStack stack) {
-		CompoundTag tag = stack.getOrCreateTag();
-		if (tag.contains("cookTime") && tag.contains("fuelTime")) {
-			int cookTime = tag.getInt("cookTime");
-			int fuelTime = tag.getInt("fuelTime");
+		var nbt = stack.getOrCreateTag();
+		if (nbt.contains("cookTime") && nbt.contains("fuelTime")) {
+			int cookTime = nbt.getInt("cookTime");
+			int fuelTime = nbt.getInt("fuelTime");
 			return cookTime > 0 && fuelTime > 0;
 		}
 		return false;
@@ -46,10 +48,10 @@ public class PocketFurnace<T extends AbstractCookingRecipe> extends Item {
 
 	@Override
 	public int getItemBarStep(ItemStack stack) {
-		CompoundTag tag = stack.getOrCreateTag();
-		if (tag.contains("cookTime") && tag.contains("maxCookTime")) {
-			int cookTime = tag.getInt("cookTime");
-			int maxCookTime = tag.getInt("maxCookTime");
+		var nbt = stack.getOrCreateTag();
+		if (nbt.contains("cookTime") && nbt.contains("maxCookTime")) {
+			int cookTime = nbt.getInt("cookTime");
+			int maxCookTime = nbt.getInt("maxCookTime");
 			return Math.round((maxCookTime - cookTime) / ((float) (maxCookTime)) * 13f);
 		}
 		return 0;
@@ -57,8 +59,8 @@ public class PocketFurnace<T extends AbstractCookingRecipe> extends Item {
 
 	@Override
 	public int getItemBarColor(ItemStack stack) {
-		CompoundTag tag = stack.getOrCreateTag();
-		if (tag.contains("cookTime")) {
+		var nbt = stack.getOrCreateTag();
+		if (nbt.contains("cookTime")) {
 			return MathHelper.packRgb(0, 150, 150);
 		}
 		return MathHelper.packRgb(0, 150, 150);
@@ -71,44 +73,44 @@ public class PocketFurnace<T extends AbstractCookingRecipe> extends Item {
 	 */
 	@Override
 	public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-		if (!world.isClient) {
-			CompoundTag tag = stack.getOrCreateTag();
+		if (!world.isClient()) {
+			var nbt = stack.getOrCreateTag();
 			ItemStack input = ItemStack.EMPTY;
 			ItemStack fuel = ItemStack.EMPTY;
 			ItemStack output = ItemStack.EMPTY;
 			int fuelTime = 0;
 			int cookTime = 0;
 			int customModelData = 0;
-			if (tag.contains("input")) {
-				input = ItemStack.fromTag(tag.getCompound("input"));
+			if (nbt.contains("input")) {
+				input = ItemStack.fromNbt(nbt.getCompound("input"));
 			}
-			if (tag.contains("fuel")) {
-				fuel = ItemStack.fromTag(tag.getCompound("fuel"));
+			if (nbt.contains("fuel")) {
+				fuel = ItemStack.fromNbt(nbt.getCompound("fuel"));
 			}
-			if (tag.contains("output")) {
-				output = ItemStack.fromTag(tag.getCompound("output"));
+			if (nbt.contains("output")) {
+				output = ItemStack.fromNbt(nbt.getCompound("output"));
 			}
-			if (tag.contains("fuelTime")) {
-				fuelTime = tag.getInt("fuelTime");
+			if (nbt.contains("fuelTime")) {
+				fuelTime = nbt.getInt("fuelTime");
 			}
-			if (tag.contains("cookTime")) {
-				cookTime = tag.getInt("cookTime");
+			if (nbt.contains("cookTime")) {
+				cookTime = nbt.getInt("cookTime");
 			}
-			if (tag.contains("CustomModelData")) {
-				customModelData = tag.getInt("CustomModelData");
+			if (nbt.contains("CustomModelData")) {
+				customModelData = nbt.getInt("CustomModelData");
 			}
 			if (cookTime > 0) {
 				if (fuelTime > 0) {
 					fuelTime--;
-					tag.putInt("fuelTime", fuelTime);
+					nbt.putInt("fuelTime", fuelTime);
 				}
 				if (fuelTime == 0) {
 					if (fuel.getCount() > 0) {
 						fuelTime = AbstractFurnaceBlockEntity.createFuelTimeMap().getOrDefault(fuel.getItem(), 0);
-						tag.putInt("fuelTime", fuelTime);
-						tag.putInt("maxFuelTime", fuelTime);
+						nbt.putInt("fuelTime", fuelTime);
+						nbt.putInt("maxFuelTime", fuelTime);
 						fuel.decrement(1);
-						tag.put("fuel", fuel.toTag(new CompoundTag()));
+						nbt.put("fuel", fuel.writeNbt(new NbtCompound()));
 					} else {
 						return;
 					}
@@ -116,64 +118,64 @@ public class PocketFurnace<T extends AbstractCookingRecipe> extends Item {
 				cookTime--;
 				if (cookTime == 0) {
 					Optional<T> recipe = world.getRecipeManager().getFirstMatch(type,
-							new SimpleInventory(new ItemStack[] { input }), world);
+							new SimpleInventory(input), world);
 					if (recipe.isPresent()) {
 						if (output.isEmpty()) {
 							output = recipe.get().getOutput().copy();
 						} else if (output.isItemEqual(recipe.get().getOutput())) {
 							output.increment(1);
 						}
-						tag.put("output", output.toTag(new CompoundTag()));
+						nbt.put("output", output.writeNbt(new NbtCompound()));
 						if (output.getCount() < output.getMaxCount() && input.getCount() > 1) {
 							cookTime = recipe.get().getCookTime();
-							tag.putInt("maxCookTime", cookTime);
+							nbt.putInt("maxCookTime", cookTime);
 						}
 					}
 					input.decrement(1);
-					tag.put("input", input.toTag(new CompoundTag()));
+					nbt.put("input", input.writeNbt(new NbtCompound()));
 				}
-				tag.putInt("cookTime", cookTime);
+				nbt.putInt("cookTime", cookTime);
 			} else {
 				if (fuelTime > 0) {
 					fuelTime--;
-					tag.putInt("fuelTime", fuelTime);
+					nbt.putInt("fuelTime", fuelTime);
 				}
 				if (output.getCount() < output.getMaxCount() && input.getCount() > 0) {
 					Optional<T> recipe = world.getRecipeManager().getFirstMatch(type,
-							new SimpleInventory(new ItemStack[] { input }), world);
+							new SimpleInventory(input), world);
 					if (recipe.isPresent() && (output.isEmpty() || (output.isItemEqual(recipe.get().getOutput())
 							&& output.getCount() < output.getMaxCount()))) {
 						cookTime = recipe.get().getCookTime();
-						tag.putInt("cookTime", cookTime);
-						tag.putInt("maxCookTime", cookTime);
+						nbt.putInt("cookTime", cookTime);
+						nbt.putInt("maxCookTime", cookTime);
 					}
 				}
 			}
 			if ((customModelData == 0) != (fuelTime == 0)) {
-				tag.putInt("CustomModelData", 1 - customModelData);
+				nbt.putInt("CustomModelData", 1 - customModelData);
 			}
 		}
 	}
 
 	@Override
-	public boolean onClicked(ItemStack stack, ItemStack applied, Slot slot, ClickType arg,
-			PlayerInventory playerInventory) {
-		CompoundTag tag = stack.getOrCreateTag();
-		if (arg == ClickType.RIGHT) {
+	public boolean onClicked(ItemStack stack, ItemStack applied, Slot slot, ClickType clickType,
+							 PlayerEntity player, StackReference cursor) {
+		var nbt = stack.getOrCreateTag();
+		if (clickType == ClickType.RIGHT) {
 			if (applied.isEmpty()) {
-				if (tag.contains("output")) {
-					ItemStack output = ItemStack.fromTag(tag.getCompound("output"));
-					playerInventory.setCursorStack(output.copy());
-					tag.remove("output");
+				if (nbt.contains("output")) {
+					var output = ItemStack.fromNbt(nbt.getCompound("output"));
+					cursor.set(output.copy());
+					nbt.remove("output");
 					return true;
 				}
 			}
-			ItemStack input = ItemStack.EMPTY;
-			if (tag.contains("input")) {
-				input = ItemStack.fromTag(tag.getCompound("input"));
+			var input = ItemStack.EMPTY;
+			if (nbt.contains("input")) {
+				input = ItemStack.fromNbt(nbt.getCompound("input"));
 			}
 			if ((!input.isEmpty() && input.isItemEqual(applied))
-					|| (input.isEmpty() && isSmeltable(playerInventory.player.world, applied))) {
+					|| (input.isEmpty() && isSmeltable(player.world, applied))) {
 				if (input.isEmpty()) {
 					input = applied.copy();
 					applied.setCount(0);
@@ -186,13 +188,13 @@ public class PocketFurnace<T extends AbstractCookingRecipe> extends Item {
 						applied.setCount(0);
 					}
 				}
-				tag.put("input", input.toTag(new CompoundTag()));
-				stack.setTag(tag);
+				nbt.put("input", input.writeNbt(new NbtCompound()));
+				stack.setTag(nbt);
 				return true;
 			}
-			ItemStack fuel = ItemStack.EMPTY;
-			if (tag.contains("fuel")) {
-				fuel = ItemStack.fromTag(tag.getCompound("fuel"));
+			var fuel = ItemStack.EMPTY;
+			if (nbt.contains("fuel")) {
+				fuel = ItemStack.fromNbt(nbt.getCompound("fuel"));
 			}
 			if ((!fuel.isEmpty() && fuel.isItemEqual(applied))
 					|| (fuel.isEmpty() && AbstractFurnaceBlockEntity.canUseAsFuel(applied))) {
@@ -208,8 +210,8 @@ public class PocketFurnace<T extends AbstractCookingRecipe> extends Item {
 						applied.setCount(0);
 					}
 				}
-				tag.put("fuel", fuel.toTag(new CompoundTag()));
-				stack.setTag(tag);
+				nbt.put("fuel", fuel.writeNbt(new NbtCompound()));
+				stack.setTag(nbt);
 				return true;
 			}
 		}
@@ -222,11 +224,11 @@ public class PocketFurnace<T extends AbstractCookingRecipe> extends Item {
 	}
 
 	protected boolean isSmeltable(World world, ItemStack itemStack) {
-		return world.getRecipeManager().getFirstMatch(type, new SimpleInventory(new ItemStack[] { itemStack }), world)
+		return world.getRecipeManager().getFirstMatch(type, new SimpleInventory(itemStack), world)
 				.isPresent();
 	}
 
-	class PocketFurnaceTooltip implements ConvertibleTooltipData, TooltipComponent {
+	static class PocketFurnaceTooltip implements ConvertibleTooltipData, TooltipComponent {
 		private final Identifier FURNACE = new Identifier("pockettools", "textures/gui/component/furnace.png");
 		public ItemStack stack;
 
@@ -251,34 +253,34 @@ public class PocketFurnace<T extends AbstractCookingRecipe> extends Item {
 
 		@Override
 		public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer, int z, TextureManager textureManager) {
-			CompoundTag tag = stack.getOrCreateTag();
-			ItemStack input = ItemStack.EMPTY;
-			ItemStack fuel = ItemStack.EMPTY;
-			ItemStack output = ItemStack.EMPTY;
+			var nbt = stack.getOrCreateTag();
+			var input = ItemStack.EMPTY;
+			var fuel = ItemStack.EMPTY;
+			var output = ItemStack.EMPTY;
 			int fuelTime = 0;
 			int cookTime = 0;
 			int maxFuelTime = 0;
 			int maxCookTime = 0;
-			if (tag.contains("input")) {
-				input = ItemStack.fromTag(tag.getCompound("input"));
+			if (nbt.contains("input")) {
+				input = ItemStack.fromNbt(nbt.getCompound("input"));
 			}
-			if (tag.contains("fuel")) {
-				fuel = ItemStack.fromTag(tag.getCompound("fuel"));
+			if (nbt.contains("fuel")) {
+				fuel = ItemStack.fromNbt(nbt.getCompound("fuel"));
 			}
-			if (tag.contains("output")) {
-				output = ItemStack.fromTag(tag.getCompound("output"));
+			if (nbt.contains("output")) {
+				output = ItemStack.fromNbt(nbt.getCompound("output"));
 			}
-			if (tag.contains("fuelTime")) {
-				fuelTime = tag.getInt("fuelTime");
+			if (nbt.contains("fuelTime")) {
+				fuelTime = nbt.getInt("fuelTime");
 			}
-			if (tag.contains("cookTime")) {
-				cookTime = tag.getInt("cookTime");
+			if (nbt.contains("cookTime")) {
+				cookTime = nbt.getInt("cookTime");
 			}
-			if (tag.contains("maxFuelTime")) {
-				maxFuelTime = tag.getInt("maxFuelTime");
+			if (nbt.contains("maxFuelTime")) {
+				maxFuelTime = nbt.getInt("maxFuelTime");
 			}
-			if (tag.contains("maxCookTime")) {
-				maxCookTime = tag.getInt("maxCookTime");
+			if (nbt.contains("maxCookTime")) {
+				maxCookTime = nbt.getInt("maxCookTime");
 			}
 			itemRenderer.renderGuiItemIcon(input, x + 2, y + 2);
 			itemRenderer.renderGuiItemOverlay(textRenderer, input, x + 2, y + 2);
@@ -286,7 +288,8 @@ public class PocketFurnace<T extends AbstractCookingRecipe> extends Item {
 			itemRenderer.renderGuiItemOverlay(textRenderer, output, x + 48, y + 2);
 			itemRenderer.renderGuiItemIcon(fuel, x + 2, y + 20);
 			itemRenderer.renderGuiItemOverlay(textRenderer, fuel, x + 2, y + 20);
-			textureManager.bindTexture(FURNACE);
+			RenderSystem.setShaderColor(1.f, 1.f, 1.f, 1.f);
+			RenderSystem.setShaderTexture(0, FURNACE);
 			if (maxFuelTime > 0) {
 				int fuelProgress = fuelTime * 13 / maxFuelTime;
 				DrawableHelper.drawTexture(matrices, x + 26, y + 36 - fuelProgress, z, 0, 13 - fuelProgress, 13, fuelProgress + 1, 256, 256);

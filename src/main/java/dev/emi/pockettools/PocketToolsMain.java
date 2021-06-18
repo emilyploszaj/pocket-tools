@@ -1,15 +1,6 @@
 package dev.emi.pockettools;
 
-import dev.emi.pockettools.item.PocketArmorStand;
-import dev.emi.pockettools.item.PocketCactus;
-import dev.emi.pockettools.item.PocketComposter;
-import dev.emi.pockettools.item.PocketEndPortal;
-import dev.emi.pockettools.item.PocketEnderChest;
-import dev.emi.pockettools.item.PocketFurnace;
-import dev.emi.pockettools.item.PocketGrindstone;
-import dev.emi.pockettools.item.PocketJukebox;
-import dev.emi.pockettools.item.PocketNoteBlock;
-import dev.emi.pockettools.item.PocketStonecutter;
+import dev.emi.pockettools.item.*;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.minecraft.item.Item;

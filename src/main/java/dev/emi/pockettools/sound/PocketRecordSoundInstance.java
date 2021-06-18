@@ -1,17 +1,15 @@
 package dev.emi.pockettools.sound;
 
-import java.util.UUID;
-
 import dev.emi.pockettools.PocketToolsMain;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.sound.EntityTrackingSoundInstance;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
+
+import java.util.UUID;
 
 @Environment(EnvType.CLIENT)
 public class PocketRecordSoundInstance extends EntityTrackingSoundInstance {
@@ -21,7 +19,7 @@ public class PocketRecordSoundInstance extends EntityTrackingSoundInstance {
 	private final PlayerEntity e;
 	
 	public PocketRecordSoundInstance(SoundEvent sound, SoundCategory soundCategory, PlayerEntity entity) {
-		super(sound, soundCategory, entity);
+		super(sound, soundCategory, 1.f, 1.f, entity);
 		e = entity;
 	}
 
@@ -39,8 +37,8 @@ public class PocketRecordSoundInstance extends EntityTrackingSoundInstance {
 		if (lastCheckin < 0) {
 			end();
 		}
-		ItemStack stack = ((PlayerEntity) e).getInventory().getCursorStack();
-		CompoundTag tag = stack.getOrCreateTag();
+		var stack = this.e.currentScreenHandler.getCursorStack();
+		var tag = stack.getOrCreateTag();
 		if (stack.getItem() == PocketToolsMain.POCKET_JUKEBOX && tag.contains("uuid") && tag.getUuid("uuid").equals(activeUuid)) {
 			lastCheckin = 5;
 		} else {

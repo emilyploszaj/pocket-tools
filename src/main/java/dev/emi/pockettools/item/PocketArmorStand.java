@@ -1,9 +1,5 @@
 package dev.emi.pockettools.item;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 import dev.emi.pockettools.tooltip.ConvertibleTooltipData;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
@@ -15,16 +11,19 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.StackReference;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ArmorMaterial;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.ClickType;
-import net.minecraft.world.World;
+
+import java.util.ArrayList;
+import java.util.Optional;
 
 public class PocketArmorStand extends Item {
 
@@ -33,22 +32,21 @@ public class PocketArmorStand extends Item {
 	}
 
 	@Override
-	public boolean onClicked(ItemStack self, ItemStack stack, Slot slot, ClickType clickType, PlayerInventory playerInventory) {
-		PlayerEntity player = playerInventory.player;
-		World world = player.world;
-		CompoundTag tag = self.getOrCreateTag();
+	public boolean onClicked(ItemStack self, ItemStack otherStack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursor) {
+		var world = player.world;
+		var nbt = self.getOrCreateTag();
 		if (clickType == ClickType.RIGHT) {
-			if (stack.isEmpty()) {
-				dumpArmor(tag, playerInventory);
+			if (otherStack.isEmpty()) {
+				dumpArmor(nbt, player.getInventory());
 				if (world.isClient) {
 					world.playSound(player, player.getBlockPos(), SoundEvents.ITEM_ARMOR_EQUIP_GENERIC, SoundCategory.PLAYERS, 1.0f, 1.0f);
 				}
 				return true;
 			} else {
-				EquipmentSlot es = MobEntity.method_32326(stack);
+				EquipmentSlot es = MobEntity.getPreferredEquipmentSlot(otherStack);
 				if (es != EquipmentSlot.MAINHAND && es != EquipmentSlot.OFFHAND) {
-					ItemStack inner = swapArmor(self, stack, es, tag, player);
-					playerInventory.setCursorStack(inner);
+					var inner = swapArmor(self, otherStack, es, nbt, player);
+					cursor.set(inner);
 					return true;
 				}
 			}
@@ -57,26 +55,25 @@ public class PocketArmorStand extends Item {
 	}
 
 	@Override
-	public boolean onStackClicked(ItemStack self, Slot slot, ClickType clickType, PlayerInventory playerInventory) {
-		ItemStack stack = slot.getStack();
-		PlayerEntity player = playerInventory.player;
-		CompoundTag tag = self.getOrCreateTag();
+	public boolean onStackClicked(ItemStack self, Slot slot, ClickType clickType, PlayerEntity player) {
+		var stack = slot.getStack();
+		var nbt = self.getOrCreateTag();
 		if (slot.canTakeItems(player) && clickType == ClickType.RIGHT) {
-			EquipmentSlot es = MobEntity.method_32326(stack);
+			EquipmentSlot es = MobEntity.getPreferredEquipmentSlot(stack);
 			if (es != EquipmentSlot.MAINHAND && es != EquipmentSlot.OFFHAND) {
 				String name = es.getName();
-				ItemStack inner = ItemStack.EMPTY;
-				if (tag.contains(name)) {
-					inner = ItemStack.fromTag(tag.getCompound(name));
+				var inner = ItemStack.EMPTY;
+				if (nbt.contains(name)) {
+					inner = ItemStack.fromNbt(nbt.getCompound(name));
 				}
 				if (slot.canInsert(inner) || inner.isEmpty()) {
-					inner = swapArmor(self, stack, es, tag, player);
+					inner = swapArmor(self, stack, es, nbt, player);
 					slot.setStack(inner);
 					return true;
 				}
 			}
 		}
-		return super.onStackClicked(self, slot, clickType, playerInventory);
+		return super.onStackClicked(self, slot, clickType, player);
 	}
 
 	@Override
@@ -84,16 +81,16 @@ public class PocketArmorStand extends Item {
 		return Optional.of(new PocketArmorStandTooltip(stack));
 	}
 
-	private ItemStack swapArmor(ItemStack self, ItemStack stack, EquipmentSlot es, CompoundTag tag, PlayerEntity player) {
-		World world = player.world;
+	private ItemStack swapArmor(ItemStack self, ItemStack stack, EquipmentSlot es, NbtCompound tag, PlayerEntity player) {
+		var world = player.world;
 		String name = es.getName();
-		ItemStack inner = ItemStack.EMPTY;
+		var inner = ItemStack.EMPTY;
 		if (tag.contains(name)) {
-			inner = ItemStack.fromTag(tag.getCompound(name));
+			inner = ItemStack.fromNbt(tag.getCompound(name));
 		}
-		if (world.isClient) {
-			if (stack.getItem() instanceof ArmorItem) {
-				ArmorMaterial material = ((ArmorItem) stack.getItem()).getMaterial();
+		if (world.isClient()) {
+			if (stack.getItem() instanceof ArmorItem armorItem) {
+				ArmorMaterial material = armorItem.getMaterial();
 				world.playSound(player, player.getBlockPos(), material.getEquipSound(),
 						SoundCategory.PLAYERS, 1.0f, 1.0f);
 			} else {
@@ -101,7 +98,7 @@ public class PocketArmorStand extends Item {
 						SoundCategory.PLAYERS, 1.0f, 1.0f);
 			}
 		}
-		tag.put(name, stack.toTag(new CompoundTag()));
+		tag.put(name, stack.writeNbt(new NbtCompound()));
 		int mask = 0;
 		if (tag.contains("head")) {
 			mask |= 1;
@@ -119,31 +116,31 @@ public class PocketArmorStand extends Item {
 		return inner;
 	}
 
-	private void dumpArmor(CompoundTag tag, PlayerInventory playerInventory) {
-		List<ItemStack> stacks = new ArrayList<ItemStack>();
+	private void dumpArmor(NbtCompound tag, PlayerInventory playerInventory) {
+		var stacks = new ArrayList<ItemStack>();
 		if (tag.contains("head")) {
-			stacks.add(ItemStack.fromTag(tag.getCompound("head")));
+			stacks.add(ItemStack.fromNbt(tag.getCompound("head")));
 			tag.remove("head");
 		}
 		if (tag.contains("chest")) {
-			stacks.add(ItemStack.fromTag(tag.getCompound("chest")));
+			stacks.add(ItemStack.fromNbt(tag.getCompound("chest")));
 			tag.remove("chest");
 		}
 		if (tag.contains("legs")) {
-			stacks.add(ItemStack.fromTag(tag.getCompound("legs")));
+			stacks.add(ItemStack.fromNbt(tag.getCompound("legs")));
 			tag.remove("legs");
 		}
 		if (tag.contains("feet")) {
-			stacks.add(ItemStack.fromTag(tag.getCompound("feet")));
+			stacks.add(ItemStack.fromNbt(tag.getCompound("feet")));
 			tag.remove("feet");
 		}
 		tag.remove("CustomModelData");
-		for (ItemStack s : stacks) {
+		for (var s : stacks) {
 			playerInventory.offerOrDrop(s);
 		}
 	}
 
-	class PocketArmorStandTooltip implements ConvertibleTooltipData, TooltipComponent {
+	static class PocketArmorStandTooltip implements ConvertibleTooltipData, TooltipComponent {
 		public ItemStack stack;
 
 		public PocketArmorStandTooltip(ItemStack stack) {
@@ -167,24 +164,24 @@ public class PocketArmorStand extends Item {
 
 		@Override
 		public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer, int z, TextureManager textureManager) {
-			CompoundTag tag = stack.getOrCreateTag();
-			if (tag.contains("head")) {
-				ItemStack stack = ItemStack.fromTag(tag.getCompound("head"));
+			var nbt = stack.getOrCreateTag();
+			if (nbt.contains("head")) {
+				ItemStack stack = ItemStack.fromNbt(nbt.getCompound("head"));
 				itemRenderer.renderGuiItemIcon(stack, x + 2, y + 2);
 				itemRenderer.renderGuiItemOverlay(textRenderer, stack, x + 2, y + 2);
 			}
-			if (tag.contains("chest")) {
-				ItemStack stack = ItemStack.fromTag(tag.getCompound("chest"));
+			if (nbt.contains("chest")) {
+				ItemStack stack = ItemStack.fromNbt(nbt.getCompound("chest"));
 				itemRenderer.renderGuiItemIcon(stack, x + 18, y + 2);
 				itemRenderer.renderGuiItemOverlay(textRenderer, stack, x + 18, y + 2);
 			}
-			if (tag.contains("legs")) {
-				ItemStack stack = ItemStack.fromTag(tag.getCompound("legs"));
+			if (nbt.contains("legs")) {
+				ItemStack stack = ItemStack.fromNbt(nbt.getCompound("legs"));
 				itemRenderer.renderGuiItemIcon(stack, x + 34, y + 2);
 				itemRenderer.renderGuiItemOverlay(textRenderer, stack, x + 34, y + 2);
 			}
-			if (tag.contains("feet")) {
-				ItemStack stack = ItemStack.fromTag(tag.getCompound("feet"));
+			if (nbt.contains("feet")) {
+				ItemStack stack = ItemStack.fromNbt(nbt.getCompound("feet"));
 				itemRenderer.renderGuiItemIcon(stack, x + 50, y + 2);
 				itemRenderer.renderGuiItemOverlay(textRenderer, stack, x + 50, y + 2);
 			}

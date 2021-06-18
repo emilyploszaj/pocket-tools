@@ -1,11 +1,6 @@
 package dev.emi.pockettools.item;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 import com.mojang.blaze3d.systems.RenderSystem;
-
 import dev.emi.pockettools.tooltip.ConvertibleTooltipData;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
@@ -17,11 +12,11 @@ import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.texture.TextureManager;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
+import net.minecraft.inventory.StackReference;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.recipe.RecipeType;
 import net.minecraft.recipe.StonecuttingRecipe;
 import net.minecraft.screen.slot.Slot;
@@ -29,7 +24,10 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.ClickType;
 import net.minecraft.util.math.Matrix4f;
-import net.minecraft.world.World;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 public class PocketStonecutter extends Item {
 
@@ -38,34 +36,33 @@ public class PocketStonecutter extends Item {
 	}
 
 	@Override
-	public boolean onClicked(ItemStack self, ItemStack stack, Slot slot, ClickType clickType, PlayerInventory playerInventory) {
-		PlayerEntity player = playerInventory.player;
-		World world = player.world;
-		CompoundTag tag = self.getOrCreateTag();
+	public boolean onClicked(ItemStack stack, ItemStack otherStack, Slot slot, ClickType clickType,  PlayerEntity player, StackReference cursorStackReference) {
+		var world = player.world;
+		var nbt = stack.getOrCreateTag();
 		if (clickType == ClickType.RIGHT) {
-			if (stack.isEmpty()) {
-				if (tag.contains("base")) {
-					ItemStack base = ItemStack.fromTag(tag.getCompound("base"));
-					List<StonecuttingRecipe> list = world.getRecipeManager().getAllMatches(RecipeType.STONECUTTING, new SimpleInventory(base), world);
+			if (otherStack.isEmpty()) {
+				if (nbt.contains("base")) {
+					var base = ItemStack.fromNbt(nbt.getCompound("base"));
+					var list = world.getRecipeManager().getAllMatches(RecipeType.STONECUTTING, new SimpleInventory(base), world);
 					int offset = -1;
-					if (tag.contains("offset")) {
-						offset = tag.getInt("offset");
+					if (nbt.contains("offset")) {
+						offset = nbt.getInt("offset");
 					}
 					offset++;
 					if (offset >= list.size()) {
 						offset = 0;
 					}
-					tag.putInt("offset", offset);
+					nbt.putInt("offset", offset);
 					if (world.isClient) {
 						world.playSound(player, player.getBlockPos(), SoundEvents.UI_STONECUTTER_SELECT_RECIPE, SoundCategory.BLOCKS, 1.0F, 1.0F);
 					}
 					return true;
 				}
 			} else {
-				List<StonecuttingRecipe> list = world.getRecipeManager().getAllMatches(RecipeType.STONECUTTING, new SimpleInventory(stack), world);
+				var list = world.getRecipeManager().getAllMatches(RecipeType.STONECUTTING, new SimpleInventory(otherStack), world);
 				if (!list.isEmpty()) {
-					tag.put("base", stack.toTag(new CompoundTag()));
-					tag.putInt("offset", 0);
+					nbt.put("base", otherStack.writeNbt(new NbtCompound()));
+					nbt.putInt("offset", 0);
 					if (world.isClient) {
 						world.playSound(player, player.getBlockPos(), SoundEvents.UI_STONECUTTER_SELECT_RECIPE, SoundCategory.BLOCKS, 1.0F, 1.0F);
 					}
@@ -73,17 +70,17 @@ public class PocketStonecutter extends Item {
 				}
 			}
 		}
-		return super.onClicked(self, stack, slot, clickType, playerInventory);
+		return super.onClicked(stack, otherStack, slot, clickType, player, cursorStackReference);
 	}
-	
+
 	@Override
-	public boolean onStackClicked(ItemStack self, Slot slot, ClickType clickType, PlayerInventory playerInventory) {
-		World world = playerInventory.player.world;
-		ItemStack stack = slot.getStack();
+	public boolean onStackClicked(ItemStack self, Slot slot, ClickType clickType, PlayerEntity player) {
+		var world = player.world;
+		var stack = slot.getStack();
 		if (clickType == ClickType.RIGHT) {
-			CompoundTag tag = self.getOrCreateTag();
+			var tag = self.getOrCreateTag();
 			if (tag.contains("base")) {
-				ItemStack base = ItemStack.fromTag(tag.getCompound("base"));
+				ItemStack base = ItemStack.fromNbt(tag.getCompound("base"));
 				if (base.isItemEqual(stack)) {
 					List<StonecuttingRecipe> list = world.getRecipeManager().getAllMatches(RecipeType.STONECUTTING, new SimpleInventory(stack), world);
 					int offset = 0;
@@ -93,26 +90,18 @@ public class PocketStonecutter extends Item {
 					if (offset < list.size()) {
 						ItemStack output = list.get(offset).getOutput().copy();
 						int count = output.getCount() * stack.getCount();
-						if (count > output.getMaxCount()) {
-							output.setCount(output.getMaxCount());
-						} else {
-							output.setCount(count);
-						}
+						output.setCount(Math.min(count, output.getMaxCount()));
 						count -= output.getCount();
 						if (slot.canInsert(output)) {
 							slot.setStack(output);
 							while (count > 0) {
 								output = output.copy();
-								if (count > output.getMaxCount()) {
-									output.setCount(output.getMaxCount());
-								} else {
-									output.setCount(count);
-								}
+								output.setCount(Math.min(count, output.getMaxCount()));
 								count -= output.getCount();
-								playerInventory.offerOrDrop(output);
+								player.getInventory().offerOrDrop(output);
 							}
 							if (world.isClient) {
-								world.playSound(playerInventory.player, playerInventory.player.getBlockPos(), SoundEvents.UI_STONECUTTER_TAKE_RESULT, SoundCategory.BLOCKS, 1.0F, 1.0F);
+								world.playSound(player, player.getBlockPos(), SoundEvents.UI_STONECUTTER_TAKE_RESULT, SoundCategory.BLOCKS, 1.0F, 1.0F);
 							}
 							return true;
 						}
@@ -120,7 +109,7 @@ public class PocketStonecutter extends Item {
 				}
 			}
 		}
-		return super.onStackClicked(self, slot, clickType, playerInventory);
+		return super.onStackClicked(self, slot, clickType, player);
 	}
 
 	@Override
@@ -129,16 +118,16 @@ public class PocketStonecutter extends Item {
 	}
 
 	class PocketStonecutterTooltip implements ConvertibleTooltipData, TooltipComponent {
-		public List<StonecuttingRecipe> list = new ArrayList<StonecuttingRecipe>();
+		public List<StonecuttingRecipe> list = new ArrayList<>();
 		public ItemStack stack;
 
 		public PocketStonecutterTooltip(ItemStack stack) {
 			this.stack = stack;
-			CompoundTag tag = stack.getOrCreateTag();
-			if (tag.contains("base")) {
-				ItemStack base = ItemStack.fromTag(tag.getCompound("base"));
-				MinecraftClient client = MinecraftClient.getInstance();
-				World world = client.world;
+			var nbt = stack.getOrCreateTag();
+			if (nbt.contains("base")) {
+				var base = ItemStack.fromNbt(nbt.getCompound("base"));
+				var client = MinecraftClient.getInstance();
+				var world = client.world;
 				list = world.getRecipeManager().getAllMatches(RecipeType.STONECUTTING, new SimpleInventory(base), world);
 			}
 		}
@@ -163,15 +152,15 @@ public class PocketStonecutter extends Item {
 
 		@Override
 		public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer, int z, TextureManager textureManager) {
-			CompoundTag tag = stack.getOrCreateTag();
+			var nbt = stack.getOrCreateTag();
 			if (!list.isEmpty()) {
 				int offset = 0;
-				if (tag.contains("offset")) {
-					offset = tag.getInt("offset");
+				if (nbt.contains("offset")) {
+					offset = nbt.getInt("offset");
 				}
 				int sx = 0;
 				int sy = 0;
-				for (StonecuttingRecipe recipe : list) {
+				for (var recipe : list) {
 					itemRenderer.renderGuiItemIcon(recipe.getOutput(), x + sx * 18 + 2, y + sy * 18 + 2);
 					itemRenderer.renderGuiItemOverlay(textRenderer, recipe.getOutput(), x + sx * 18 + 2, y + sy * 18 + 2);
 					sx++;
@@ -182,8 +171,8 @@ public class PocketStonecutter extends Item {
 				}
 				sx = offset % 4;
 				sy = offset / 4;
-				RenderSystem.color4f(0.0F, 0.6F, 0.7F, 1.0F);
-				textureManager.bindTexture(DrawableHelper.STATS_ICON_TEXTURE);
+				RenderSystem.setShaderColor(0.0F, 0.6F, 0.7F, 1.0F);
+				RenderSystem.setShaderTexture(0, DrawableHelper.STATS_ICON_TEXTURE);
 				DrawableHelper.drawTexture(matrices, x + sx * 18 + 1, y + sy * 18 + 1, z, 0.0F, 0.0F, 18, 18, 128, 128);
 			}
 			TooltipComponent.super.drawItems(textRenderer, x, y, matrices, itemRenderer, z, textureManager);
