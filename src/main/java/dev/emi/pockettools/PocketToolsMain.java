@@ -18,7 +18,7 @@ public class PocketToolsMain implements ModInitializer {
 	public static final ItemGroup POCKET_GROUP = FabricItemGroupBuilder.build(new Identifier("pockettools", "pockettools"), () -> {
 		return new ItemStack(PocketToolsMain.POCKET_CACTUS);
 	});
-		
+
 	public static final Item POCKET_FURNACE = new PocketFurnace<SmeltingRecipe>(RecipeType.SMELTING, new Item.Settings().maxCount(1).group(POCKET_GROUP));
 	public static final Item POCKET_BLAST_FURNACE = new PocketFurnace<BlastingRecipe>(RecipeType.BLASTING, new Item.Settings().maxCount(1).group(POCKET_GROUP));
 	public static final Item POCKET_SMOKER = new PocketFurnace<SmokingRecipe>(RecipeType.SMOKING, new Item.Settings().maxCount(1).group(POCKET_GROUP));
