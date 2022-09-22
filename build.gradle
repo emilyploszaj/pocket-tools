@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '0.8.+'
+	id 'fabric-loom' version '1.0-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -8,10 +8,7 @@ version = project.mod_version
 group = project.maven_group
 
 // This field defines the Java version your mod target.
-def targetJavaVersion = 16
-
-minecraft {
-}
+def targetJavaVersion = 17
 
 dependencies {
 	//to change the versions see the gradle.properties file
