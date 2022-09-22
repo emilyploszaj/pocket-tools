@@ -152,7 +152,7 @@ public class PocketStonecutter extends Item {
 		}
 
 		@Override
-		public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer, int z, TextureManager textureManager) {
+		public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer, int z) {
 			NbtCompound nbt = stack.getOrCreateNbt();
 			if (!list.isEmpty()) {
 				int offset = 0;

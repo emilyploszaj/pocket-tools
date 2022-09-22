@@ -164,7 +164,7 @@ public class PocketArmorStand extends Item {
 		}
 
 		@Override
-		public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer, int z, TextureManager textureManager) {
+		public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer, int z) {
 			NbtCompound nbt = stack.getOrCreateNbt();
 			if (nbt.contains("head")) {
 				ItemStack stack = ItemStack.fromNbt(nbt.getCompound("head"));

@@ -253,7 +253,9 @@ public class PocketFurnace<T extends AbstractCookingRecipe> extends Item {
 		}
 
 		@Override
-		public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer, int z, TextureManager textureManager) {
+		public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer, int z) {
+			matrices.push();
+
 			NbtCompound nbt = stack.getOrCreateNbt();
 			ItemStack input = ItemStack.EMPTY;
 			ItemStack fuel = ItemStack.EMPTY;
@@ -299,6 +301,8 @@ public class PocketFurnace<T extends AbstractCookingRecipe> extends Item {
 				int cookProgress = 22 - (cookTime * 22 / maxCookTime);
 				DrawableHelper.drawTexture(matrices, x + 22, y + 3, z, 0, 13, cookProgress, 15, 256, 256);
 			}
+
+			matrices.pop();
 		}
 	}
 }

@@ -10,5 +10,5 @@ import net.minecraft.client.util.math.MatrixStack;
 public interface ConvertibleTooltipData extends TooltipData {
 	TooltipComponent getComponent();
 
-    void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer, int z, TextureManager textureManager);
+    void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer, int z);
 }
