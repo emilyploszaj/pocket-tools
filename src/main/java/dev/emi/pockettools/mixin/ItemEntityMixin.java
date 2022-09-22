@@ -21,12 +21,12 @@ public abstract class ItemEntityMixin {
 	@Inject(at = @At("HEAD"), method = "setStack")
 	public void setStack(ItemStack stack, CallbackInfo info) {
 		if (stack.getItem() == PocketToolsMain.POCKET_END_PORTAL) {
-			if (stack.hasTag()) {
-				var nbt = stack.getTag();
+			if (stack.hasNbt()) {
+				NbtCompound nbt = stack.getNbt();
 				if (nbt.contains("portal") && nbt.getBoolean("portal")) {
 					setDespawnImmediately();
 				} else if (nbt.contains("filled") && nbt.getBoolean("filled")) {
-					stack.setTag(new NbtCompound());
+					stack.setNbt(new NbtCompound());
 				}
 			}
 		}

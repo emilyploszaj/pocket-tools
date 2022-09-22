@@ -11,6 +11,7 @@ import net.minecraft.client.render.VertexConsumerProvider.Immediate;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.texture.TextureManager;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.inventory.StackReference;
@@ -24,7 +25,7 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.ClickType;
 import net.minecraft.util.math.Matrix4f;
-
+import net.minecraft.world.World;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -37,13 +38,13 @@ public class PocketStonecutter extends Item {
 
 	@Override
 	public boolean onClicked(ItemStack stack, ItemStack otherStack, Slot slot, ClickType clickType,  PlayerEntity player, StackReference cursorStackReference) {
-		var world = player.world;
-		var nbt = stack.getOrCreateTag();
+		World world = player.world;
+		NbtCompound nbt = stack.getOrCreateNbt();
 		if (clickType == ClickType.RIGHT) {
 			if (otherStack.isEmpty()) {
 				if (nbt.contains("base")) {
-					var base = ItemStack.fromNbt(nbt.getCompound("base"));
-					var list = world.getRecipeManager().getAllMatches(RecipeType.STONECUTTING, new SimpleInventory(base), world);
+					ItemStack base = ItemStack.fromNbt(nbt.getCompound("base"));
+					List list = world.getRecipeManager().getAllMatches(RecipeType.STONECUTTING, new SimpleInventory(base), world);
 					int offset = -1;
 					if (nbt.contains("offset")) {
 						offset = nbt.getInt("offset");
@@ -59,7 +60,7 @@ public class PocketStonecutter extends Item {
 					return true;
 				}
 			} else {
-				var list = world.getRecipeManager().getAllMatches(RecipeType.STONECUTTING, new SimpleInventory(otherStack), world);
+				List list = world.getRecipeManager().getAllMatches(RecipeType.STONECUTTING, new SimpleInventory(otherStack), world);
 				if (!list.isEmpty()) {
 					nbt.put("base", otherStack.writeNbt(new NbtCompound()));
 					nbt.putInt("offset", 0);
@@ -75,10 +76,10 @@ public class PocketStonecutter extends Item {
 
 	@Override
 	public boolean onStackClicked(ItemStack self, Slot slot, ClickType clickType, PlayerEntity player) {
-		var world = player.world;
-		var stack = slot.getStack();
+		World world = player.world;
+		ItemStack stack = slot.getStack();
 		if (clickType == ClickType.RIGHT) {
-			var tag = self.getOrCreateTag();
+			NbtCompound tag = self.getOrCreateNbt();
 			if (tag.contains("base")) {
 				ItemStack base = ItemStack.fromNbt(tag.getCompound("base"));
 				if (base.isItemEqual(stack)) {
@@ -123,11 +124,11 @@ public class PocketStonecutter extends Item {
 
 		public PocketStonecutterTooltip(ItemStack stack) {
 			this.stack = stack;
-			var nbt = stack.getOrCreateTag();
+			NbtCompound nbt = stack.getOrCreateNbt();
 			if (nbt.contains("base")) {
-				var base = ItemStack.fromNbt(nbt.getCompound("base"));
-				var client = MinecraftClient.getInstance();
-				var world = client.world;
+				ItemStack base = ItemStack.fromNbt(nbt.getCompound("base"));
+				MinecraftClient client = MinecraftClient.getInstance();
+				ClientWorld world = client.world;
 				list = world.getRecipeManager().getAllMatches(RecipeType.STONECUTTING, new SimpleInventory(base), world);
 			}
 		}
@@ -152,7 +153,7 @@ public class PocketStonecutter extends Item {
 
 		@Override
 		public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer, int z, TextureManager textureManager) {
-			var nbt = stack.getOrCreateTag();
+			NbtCompound nbt = stack.getOrCreateNbt();
 			if (!list.isEmpty()) {
 				int offset = 0;
 				if (nbt.contains("offset")) {
@@ -160,7 +161,7 @@ public class PocketStonecutter extends Item {
 				}
 				int sx = 0;
 				int sy = 0;
-				for (var recipe : list) {
+				for (StonecuttingRecipe recipe : list) {
 					itemRenderer.renderGuiItemIcon(recipe.getOutput(), x + sx * 18 + 2, y + sy * 18 + 2);
 					itemRenderer.renderGuiItemOverlay(textRenderer, recipe.getOutput(), x + sx * 18 + 2, y + sy * 18 + 2);
 					sx++;
@@ -175,7 +176,7 @@ public class PocketStonecutter extends Item {
 				RenderSystem.setShaderTexture(0, DrawableHelper.STATS_ICON_TEXTURE);
 				DrawableHelper.drawTexture(matrices, x + sx * 18 + 1, y + sy * 18 + 1, z, 0.0F, 0.0F, 18, 18, 128, 128);
 			}
-			TooltipComponent.super.drawItems(textRenderer, x, y, matrices, itemRenderer, z, textureManager);
+			TooltipComponent.super.drawItems(textRenderer, x, y, matrices, itemRenderer, z);
 		}
 		@Override
 		public void drawText(TextRenderer textRenderer, int x, int y, Matrix4f matrix4f, Immediate immediate) {

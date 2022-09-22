@@ -7,6 +7,7 @@ import net.minecraft.inventory.StackReference;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -22,7 +23,7 @@ public class PocketComposter extends Item {
 
 	@Override
 	public boolean isItemBarVisible(ItemStack stack) {
-		var nbt = stack.getOrCreateTag();
+		NbtCompound nbt = stack.getOrCreateNbt();
 		if (nbt.contains("fill")) {
 			int fill = nbt.getInt("fill");
 			return fill != 0;
@@ -32,7 +33,7 @@ public class PocketComposter extends Item {
 
 	@Override
 	public int getItemBarStep(ItemStack stack) {
-		var nbt = stack.getOrCreateTag();
+		NbtCompound nbt = stack.getOrCreateNbt();
 		if (nbt.contains("fill")) {
 			int fill = nbt.getInt("fill");
 			if (fill == 8) fill = 7;
@@ -43,7 +44,7 @@ public class PocketComposter extends Item {
 
 	@Override
 	public int getItemBarColor(ItemStack stack) {
-		var nbt = stack.getOrCreateTag();
+		NbtCompound nbt = stack.getOrCreateNbt();
 		if (nbt.contains("fill")) {
 			int fill = nbt.getInt("fill");
 			if (fill == 8) {
@@ -56,7 +57,7 @@ public class PocketComposter extends Item {
 
 	@Override
 	public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-		var nbt = stack.getOrCreateTag();
+		NbtCompound nbt = stack.getOrCreateNbt();
 		int fill = 0;
 		int compost = 20;
 		if (nbt.contains("fill")) {
@@ -81,8 +82,8 @@ public class PocketComposter extends Item {
 	@Override
 	public boolean onClicked(ItemStack stack, ItemStack applied, Slot slot, ClickType arg, PlayerEntity player, StackReference cursor) {
 		if (arg == ClickType.RIGHT) {
-			var world = player.world;
-			var nbt = stack.getOrCreateTag();
+			World world = player.world;
+			NbtCompound nbt = stack.getOrCreateNbt();
 			int fill = 0;
 			if (nbt.contains("fill")) {
 				fill = nbt.getInt("fill");
@@ -91,7 +92,7 @@ public class PocketComposter extends Item {
 				cursor.set(new ItemStack(Items.BONE_MEAL, applied.getCount() + 1));
 				nbt.putInt("fill", 0);
 				nbt.putInt("CustomModelData", 0);
-				stack.setTag(nbt);
+				stack.setNbt(nbt);
 				world.playSound(null, player.getBlockPos(), SoundEvents.BLOCK_COMPOSTER_EMPTY, SoundCategory.BLOCKS, 1.0F, 1.0F);
 				return true;
 			} else if (ComposterBlock.ITEM_TO_LEVEL_INCREASE_CHANCE.containsKey(applied.getItem())) {
@@ -107,7 +108,7 @@ public class PocketComposter extends Item {
 						}
 						nbt.putInt("fill", fill + 1);
 						nbt.putInt("compost", 0);
-						stack.setTag(nbt);
+						stack.setNbt(nbt);
 						world.syncWorldEvent(1500, player.getBlockPos(), 1);
 					} else {
 						world.syncWorldEvent(1500, player.getBlockPos(), 0);

@@ -1,6 +1,7 @@
 package dev.emi.pockettools.item;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import dev.emi.pockettools.item.PocketFurnace.PocketFurnaceTooltip;
 import dev.emi.pockettools.tooltip.ConvertibleTooltipData;
 import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.client.font.TextRenderer;
@@ -37,7 +38,7 @@ public class PocketFurnace<T extends AbstractCookingRecipe> extends Item {
 
 	@Override
 	public boolean isItemBarVisible(ItemStack stack) {
-		var nbt = stack.getOrCreateTag();
+		NbtCompound nbt = stack.getOrCreateNbt();
 		if (nbt.contains("cookTime") && nbt.contains("fuelTime")) {
 			int cookTime = nbt.getInt("cookTime");
 			int fuelTime = nbt.getInt("fuelTime");
@@ -48,7 +49,7 @@ public class PocketFurnace<T extends AbstractCookingRecipe> extends Item {
 
 	@Override
 	public int getItemBarStep(ItemStack stack) {
-		var nbt = stack.getOrCreateTag();
+		NbtCompound nbt = stack.getOrCreateNbt();
 		if (nbt.contains("cookTime") && nbt.contains("maxCookTime")) {
 			int cookTime = nbt.getInt("cookTime");
 			int maxCookTime = nbt.getInt("maxCookTime");
@@ -59,7 +60,7 @@ public class PocketFurnace<T extends AbstractCookingRecipe> extends Item {
 
 	@Override
 	public int getItemBarColor(ItemStack stack) {
-		var nbt = stack.getOrCreateTag();
+		NbtCompound nbt = stack.getOrCreateNbt();
 		if (nbt.contains("cookTime")) {
 			return MathHelper.packRgb(0, 150, 150);
 		}
@@ -74,7 +75,7 @@ public class PocketFurnace<T extends AbstractCookingRecipe> extends Item {
 	@Override
 	public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
 		if (!world.isClient()) {
-			var nbt = stack.getOrCreateTag();
+			NbtCompound nbt = stack.getOrCreateNbt();
 			ItemStack input = ItemStack.EMPTY;
 			ItemStack fuel = ItemStack.EMPTY;
 			ItemStack output = ItemStack.EMPTY;
@@ -160,17 +161,17 @@ public class PocketFurnace<T extends AbstractCookingRecipe> extends Item {
 	@Override
 	public boolean onClicked(ItemStack stack, ItemStack applied, Slot slot, ClickType clickType,
 							 PlayerEntity player, StackReference cursor) {
-		var nbt = stack.getOrCreateTag();
+		NbtCompound nbt = stack.getOrCreateNbt();
 		if (clickType == ClickType.RIGHT) {
 			if (applied.isEmpty()) {
 				if (nbt.contains("output")) {
-					var output = ItemStack.fromNbt(nbt.getCompound("output"));
+					ItemStack output = ItemStack.fromNbt(nbt.getCompound("output"));
 					cursor.set(output.copy());
 					nbt.remove("output");
 					return true;
 				}
 			}
-			var input = ItemStack.EMPTY;
+			ItemStack input = ItemStack.EMPTY;
 			if (nbt.contains("input")) {
 				input = ItemStack.fromNbt(nbt.getCompound("input"));
 			}
@@ -189,10 +190,10 @@ public class PocketFurnace<T extends AbstractCookingRecipe> extends Item {
 					}
 				}
 				nbt.put("input", input.writeNbt(new NbtCompound()));
-				stack.setTag(nbt);
+				stack.setNbt(nbt);
 				return true;
 			}
-			var fuel = ItemStack.EMPTY;
+			ItemStack fuel = ItemStack.EMPTY;
 			if (nbt.contains("fuel")) {
 				fuel = ItemStack.fromNbt(nbt.getCompound("fuel"));
 			}
@@ -211,7 +212,7 @@ public class PocketFurnace<T extends AbstractCookingRecipe> extends Item {
 					}
 				}
 				nbt.put("fuel", fuel.writeNbt(new NbtCompound()));
-				stack.setTag(nbt);
+				stack.setNbt(nbt);
 				return true;
 			}
 		}
@@ -253,10 +254,10 @@ public class PocketFurnace<T extends AbstractCookingRecipe> extends Item {
 
 		@Override
 		public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer, int z, TextureManager textureManager) {
-			var nbt = stack.getOrCreateTag();
-			var input = ItemStack.EMPTY;
-			var fuel = ItemStack.EMPTY;
-			var output = ItemStack.EMPTY;
+			NbtCompound nbt = stack.getOrCreateNbt();
+			ItemStack input = ItemStack.EMPTY;
+			ItemStack fuel = ItemStack.EMPTY;
+			ItemStack output = ItemStack.EMPTY;
 			int fuelTime = 0;
 			int cookTime = 0;
 			int maxFuelTime = 0;

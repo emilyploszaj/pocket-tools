@@ -10,10 +10,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.sound.SoundCategory;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.text.TextColor;
+import net.minecraft.text.*;
 import net.minecraft.util.ClickType;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
@@ -32,7 +29,7 @@ public class PocketNoteBlock extends Item {
 	
 	@Override
 	public boolean onClicked(ItemStack self, ItemStack stack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursor) {
-		var nbt = self.getOrCreateTag();
+		NbtCompound nbt = self.getOrCreateNbt();
 		if (clickType == ClickType.RIGHT) {
 			if (stack.isEmpty()) {
 				playNote(player, self);
@@ -57,7 +54,7 @@ public class PocketNoteBlock extends Item {
 	}
 
 	public void playNote(PlayerEntity player, ItemStack stack) {
-		var tag = stack.getOrCreateTag();
+		NbtCompound tag = stack.getOrCreateNbt();
 		Instrument instrument = getInstrument(stack);
 		int pitch = 0;
 		if (tag.contains("pitch")) {
@@ -68,7 +65,7 @@ public class PocketNoteBlock extends Item {
 	}
 
 	public Instrument getInstrument(ItemStack stack) {
-		var nbt = stack.getOrCreateTag();
+		var nbt = stack.getOrCreateNbt();
 		Instrument instrument = Instrument.HARP;
 		if (nbt.contains("instrument")) {
 			var ins = ItemStack.fromNbt(nbt.getCompound("instrument"));
@@ -79,13 +76,13 @@ public class PocketNoteBlock extends Item {
 	}
 	
 	public void setInstrument(ItemStack self, ItemStack instrument) {
-		var nbt = self.getOrCreateTag();
+		NbtCompound nbt = self.getOrCreateNbt();
 		nbt.put("instrument", instrument.writeNbt(new NbtCompound()));
 		nbt.putInt("pitch", 0);
 	}
 	
 	public void pitchUp(ItemStack stack) {
-		var nbt = stack.getOrCreateTag();
+		NbtCompound nbt = stack.getOrCreateNbt();
 		int pitch = -1;
 		if (nbt.contains("pitch")) {
 			pitch = nbt.getInt("pitch");
@@ -98,14 +95,14 @@ public class PocketNoteBlock extends Item {
 	@Override
 	public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
 		super.appendTooltip(stack, world, tooltip, context);
-		var nbt = stack.getOrCreateTag();
+		NbtCompound nbt = stack.getOrCreateNbt();
 		if (nbt.contains("pitch")) {
 			int pitch = nbt.getInt("pitch");
 			float f = (float) Math.pow(2.0D, (pitch - 12) / 12.0D);
 			float red = Math.max(0.0F, MathHelper.sin((f + 0.0F) * 6.2831855F) * 0.65F + 0.35F);
 			float green = Math.max(0.0F, MathHelper.sin((f + 0.33333334F) * 6.2831855F) * 0.65F + 0.35F);
 			float blue = Math.max(0.0F, MathHelper.sin((f + 0.6666667F) * 6.2831855F) * 0.65F + 0.35F);
-			tooltip.add(new LiteralText(NOTE_NAMES[pitch]).setStyle(Style.EMPTY.withColor(TextColor.fromRgb(MathHelper.packRgb(red, green, blue)))));
+			tooltip.add(MutableText.of(new LiteralTextContent(NOTE_NAMES[pitch])).setStyle(Style.EMPTY.withColor(TextColor.fromRgb(MathHelper.packRgb(red, green, blue)))));
 		}
 	}
 }

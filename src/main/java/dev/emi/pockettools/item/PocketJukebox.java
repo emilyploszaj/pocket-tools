@@ -28,7 +28,7 @@ public class PocketJukebox extends Item {
 
 	@Override
 	public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-		var nbt = stack.getOrCreateTag();
+		NbtCompound nbt = stack.getOrCreateNbt();
 		if (world.isClient()) {
 			if (nbt.contains("start") && nbt.getInt("start") >= 1) {
 				if (nbt.contains("disc") && nbt.contains("uuid") && entity instanceof PlayerEntity) {
@@ -36,8 +36,8 @@ public class PocketJukebox extends Item {
 					if (PocketRecordSoundInstance.inst != null && !PocketRecordSoundInstance.inst.isDone()) {
 						PocketRecordSoundInstance.inst.end();
 					}
-					var d = ItemStack.fromNbt(nbt.getCompound("disc"));
-					var disc = (MusicDiscItem) d.getItem();
+					ItemStack d = ItemStack.fromNbt(nbt.getCompound("disc"));
+					MusicDiscItem disc = (MusicDiscItem) d.getItem();
 					PocketRecordSoundInstance.inst = new PocketRecordSoundInstance(disc.getSound(), SoundCategory.RECORDS, (PlayerEntity) entity);
 					PocketRecordSoundInstance.inst.start();
 					PocketRecordSoundInstance.lastCheckin = 5;
@@ -55,9 +55,9 @@ public class PocketJukebox extends Item {
 
 	@Override
 	public boolean onClicked(ItemStack self, ItemStack stack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursor) {
-		var nbt = self.getOrCreateTag();
+		NbtCompound nbt = self.getOrCreateNbt();
 		if (clickType == ClickType.RIGHT) {
-			var world = player.world;
+			World world = player.world;
 			if (nbt.contains("disc")) {
 				if (stack.isEmpty()) {
 					cursor.set(ItemStack.fromNbt(nbt.getCompound("disc")));
@@ -74,7 +74,7 @@ public class PocketJukebox extends Item {
 			} else {
 				if (stack.getItem() instanceof MusicDiscItem) {
 					if (!world.isClient()) {
-						var uuid = UUID.randomUUID();
+						UUID uuid = UUID.randomUUID();
 						nbt.putUuid("uuid", uuid);
 						nbt.putInt("start", 2);
 					}
@@ -89,13 +89,13 @@ public class PocketJukebox extends Item {
 
 	@Override
 	public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
-		var nbt = stack.getOrCreateTag();
+		NbtCompound nbt = stack.getOrCreateNbt();
 		//boolean on = false;
 		//if (nbt.contains("uuid") && nbt.getUuid("uuid").equals(activeUuid) && inst != null && !inst.isDone()) {
 		//	on = true;
 		//}
 		if (nbt.contains("disc")) {
-			var disc = ItemStack.fromNbt(nbt.getCompound("disc"));
+			ItemStack disc = ItemStack.fromNbt(nbt.getCompound("disc"));
 			MutableText text = ((MusicDiscItem) disc.getItem()).getDescription();
 			//if (on) {
 			//	//text = text.formatted(Formatting.byColorIndex((int) world.getTime() / 12 % 16));

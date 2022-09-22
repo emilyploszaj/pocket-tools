@@ -31,7 +31,7 @@ public class PocketToolsClient implements ClientModInitializer {
 		ITEM_COLORS.put(Items.SKELETON_SKULL, MathHelper.packRgb(188, 188, 188));
 		ITEM_COLORS.put(Items.ZOMBIE_HEAD, MathHelper.packRgb(62, 105, 45));
 		ColorProviderRegistry.ITEM.register((stack, tintIndex) -> {
-			var nbt = stack.getOrCreateTag();
+			var nbt = stack.getOrCreateNbt();
 			ItemStack armor = null;
 			if (tintIndex == 1) {
 				if (nbt.contains("feet")) {

@@ -21,6 +21,7 @@ import net.minecraft.screen.slot.Slot;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.ClickType;
+import net.minecraft.world.World;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -33,8 +34,8 @@ public class PocketArmorStand extends Item {
 
 	@Override
 	public boolean onClicked(ItemStack self, ItemStack otherStack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursor) {
-		var world = player.world;
-		var nbt = self.getOrCreateTag();
+		World world = player.world;
+		NbtCompound nbt = self.getOrCreateNbt();
 		if (clickType == ClickType.RIGHT) {
 			if (otherStack.isEmpty()) {
 				dumpArmor(nbt, player.getInventory());
@@ -45,7 +46,7 @@ public class PocketArmorStand extends Item {
 			} else {
 				EquipmentSlot es = MobEntity.getPreferredEquipmentSlot(otherStack);
 				if (es != EquipmentSlot.MAINHAND && es != EquipmentSlot.OFFHAND) {
-					var inner = swapArmor(self, otherStack, es, nbt, player);
+					ItemStack inner = swapArmor(self, otherStack, es, nbt, player);
 					cursor.set(inner);
 					return true;
 				}
@@ -56,13 +57,13 @@ public class PocketArmorStand extends Item {
 
 	@Override
 	public boolean onStackClicked(ItemStack self, Slot slot, ClickType clickType, PlayerEntity player) {
-		var stack = slot.getStack();
-		var nbt = self.getOrCreateTag();
+		ItemStack stack = slot.getStack();
+		NbtCompound nbt = self.getOrCreateNbt();
 		if (slot.canTakeItems(player) && clickType == ClickType.RIGHT) {
 			EquipmentSlot es = MobEntity.getPreferredEquipmentSlot(stack);
 			if (es != EquipmentSlot.MAINHAND && es != EquipmentSlot.OFFHAND) {
 				String name = es.getName();
-				var inner = ItemStack.EMPTY;
+				ItemStack inner = ItemStack.EMPTY;
 				if (nbt.contains(name)) {
 					inner = ItemStack.fromNbt(nbt.getCompound(name));
 				}
@@ -117,7 +118,7 @@ public class PocketArmorStand extends Item {
 	}
 
 	private void dumpArmor(NbtCompound tag, PlayerInventory playerInventory) {
-		var stacks = new ArrayList<ItemStack>();
+		ArrayList stacks = new ArrayList<ItemStack>();
 		if (tag.contains("head")) {
 			stacks.add(ItemStack.fromNbt(tag.getCompound("head")));
 			tag.remove("head");
@@ -135,8 +136,8 @@ public class PocketArmorStand extends Item {
 			tag.remove("feet");
 		}
 		tag.remove("CustomModelData");
-		for (var s : stacks) {
-			playerInventory.offerOrDrop(s);
+		for (Object s : stacks) {
+			playerInventory.offerOrDrop((ItemStack) s);
 		}
 	}
 
@@ -164,7 +165,7 @@ public class PocketArmorStand extends Item {
 
 		@Override
 		public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer, int z, TextureManager textureManager) {
-			var nbt = stack.getOrCreateTag();
+			NbtCompound nbt = stack.getOrCreateNbt();
 			if (nbt.contains("head")) {
 				ItemStack stack = ItemStack.fromNbt(nbt.getCompound("head"));
 				itemRenderer.renderGuiItemIcon(stack, x + 2, y + 2);

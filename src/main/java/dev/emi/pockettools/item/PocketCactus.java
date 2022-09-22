@@ -29,7 +29,7 @@ public class PocketCactus extends Item {
 
 	@Override
 	public boolean onStackClicked(ItemStack self, Slot slot, ClickType clickType, PlayerEntity player) {
-		var stack = slot.getStack();
+		ItemStack stack = slot.getStack();
 		if (clickType == ClickType.RIGHT) {
 			if (!stack.isEmpty()) {
 				stack.setCount(0);

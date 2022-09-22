@@ -6,6 +6,8 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.sound.EntityTrackingSoundInstance;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 
@@ -19,7 +21,7 @@ public class PocketRecordSoundInstance extends EntityTrackingSoundInstance {
 	private final PlayerEntity e;
 	
 	public PocketRecordSoundInstance(SoundEvent sound, SoundCategory soundCategory, PlayerEntity entity) {
-		super(sound, soundCategory, 1.f, 1.f, entity);
+		super(sound, soundCategory, 1.f, 1.f, entity, 0);
 		e = entity;
 	}
 
@@ -37,8 +39,8 @@ public class PocketRecordSoundInstance extends EntityTrackingSoundInstance {
 		if (lastCheckin < 0) {
 			end();
 		}
-		var stack = this.e.currentScreenHandler.getCursorStack();
-		var tag = stack.getOrCreateTag();
+		ItemStack stack = this.e.currentScreenHandler.getCursorStack();
+		NbtCompound tag = stack.getOrCreateNbt();
 		if (stack.getItem() == PocketToolsMain.POCKET_JUKEBOX && tag.contains("uuid") && tag.getUuid("uuid").equals(activeUuid)) {
 			lastCheckin = 5;
 		} else {

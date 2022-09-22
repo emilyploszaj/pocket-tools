@@ -24,7 +24,7 @@ public class PocketEndPortal extends Item {
 
 	@Override
 	public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-		var nbt = stack.getOrCreateTag();
+		NbtCompound nbt = stack.getOrCreateNbt();
 		if (nbt.contains("tp") && nbt.getBoolean("tp")) {
 			nbt.remove("tp");
 			// This has to happen in a tick so that there is no teleportation in the middle of a handled event
@@ -41,8 +41,8 @@ public class PocketEndPortal extends Item {
 	
 	@Override
 	public boolean onClicked(ItemStack self, ItemStack stack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursor) {
-		var nbt = self.getOrCreateTag();
-		var world = player.world;
+		NbtCompound nbt = self.getOrCreateNbt();
+		World world = player.world;
 		if (clickType == ClickType.RIGHT) {
 			if (nbt.contains("portal") && nbt.getBoolean("portal")) {
 				if (!world.isClient) {
@@ -72,11 +72,11 @@ public class PocketEndPortal extends Item {
 					stack.decrement(1);
 					nbt.putBoolean("filled", true);
 					nbt.putInt("CustomModelData", 1);
-					self.setTag(nbt);
+					self.setNbt(nbt);
 					if (world.isClient) {
 						player.playSound(SoundEvents.BLOCK_END_PORTAL_FRAME_FILL, SoundCategory.BLOCKS, 1f, player.getRandom().nextFloat() * 0.1f + 0.9f);
 					}
-					var playerInventory = player.getInventory();
+					PlayerInventory playerInventory = player.getInventory();
 					for (int i = 19; i < 26; i++) {
 						if (isLitPortal(playerInventory.getStack(i))) continue;
 						if (!isFilledPortal(playerInventory.getStack(i - 1))) continue;
@@ -101,11 +101,11 @@ public class PocketEndPortal extends Item {
 	}
 
 	public boolean isLitPortal(ItemStack stack) {
-		return stack.getItem() == this && stack.hasTag() && stack.getTag().contains("portal") && stack.getTag().getBoolean("portal");
+		return stack.getItem() == this && stack.hasNbt() && stack.getNbt().contains("portal") && stack.getNbt().getBoolean("portal");
 	}
 
 	public boolean isFilledPortal(ItemStack stack) {
-		return stack.getItem() == this && stack.hasTag() && stack.getTag().contains("filled") && stack.getTag().getBoolean("filled");
+		return stack.getItem() == this && stack.hasNbt() && stack.getNbt().contains("filled") && stack.getNbt().getBoolean("filled");
 	}
 
 	public boolean breakPortal(ItemStack self, PlayerInventory playerInventory) {
@@ -148,11 +148,11 @@ public class PocketEndPortal extends Item {
 
 	public void fillPortal(int i, PlayerInventory playerInventory) {
 		ItemStack temp = playerInventory.getStack(i);
-		var stack = new ItemStack(this);
-		var nbt = new NbtCompound();
+		ItemStack stack = new ItemStack(this);
+		NbtCompound nbt = new NbtCompound();
 		nbt.putBoolean("portal", true);
 		nbt.putInt("CustomModelData", 2);
-		stack.setTag(nbt);
+		stack.setNbt(nbt);
 		playerInventory.setStack(i, stack);
 		playerInventory.offerOrDrop(temp);
 		if (playerInventory.player.world.isClient) {
