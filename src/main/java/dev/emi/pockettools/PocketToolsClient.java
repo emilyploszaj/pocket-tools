@@ -1,20 +1,12 @@
 package dev.emi.pockettools;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
-import net.minecraft.client.color.item.ItemColorProvider;
-import net.minecraft.item.ArmorItem;
-import net.minecraft.item.ArmorMaterial;
-import net.minecraft.item.ArmorMaterials;
-import net.minecraft.item.DyeableArmorItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.item.*;
 import net.minecraft.util.math.MathHelper;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class PocketToolsClient implements ClientModInitializer {
 	// TODO Make this stuff data driven so I can feel better about hard coding it instead of generating
@@ -38,48 +30,41 @@ public class PocketToolsClient implements ClientModInitializer {
 		ITEM_COLORS.put(Items.PLAYER_HEAD, MathHelper.packRgb(200, 150, 128));
 		ITEM_COLORS.put(Items.SKELETON_SKULL, MathHelper.packRgb(188, 188, 188));
 		ITEM_COLORS.put(Items.ZOMBIE_HEAD, MathHelper.packRgb(62, 105, 45));
-		ColorProviderRegistry.ITEM.register(new ItemColorProvider() {
-
-			@Override
-			public int getColor(ItemStack stack, int tintIndex) {
-				CompoundTag tag = stack.getOrCreateTag();
-				ItemStack armor = null;
-				if (tintIndex == 1) {
-					if (tag.contains("feet")) {
-						armor = ItemStack.fromTag(tag.getCompound("feet"));
-					}
-				} else if (tintIndex == 2) {
-					if (tag.contains("legs")) {
-						armor = ItemStack.fromTag(tag.getCompound("legs"));
-					}
-				} else if (tintIndex == 3) {
-					if (tag.contains("chest")) {
-						armor = ItemStack.fromTag(tag.getCompound("chest"));
-					}
-				} else if (tintIndex == 4) {
-					if (tag.contains("head")) {
-						armor = ItemStack.fromTag(tag.getCompound("head"));
-					}
+		ColorProviderRegistry.ITEM.register((stack, tintIndex) -> {
+			var nbt = stack.getOrCreateNbt();
+			ItemStack armor = null;
+			if (tintIndex == 1) {
+				if (nbt.contains("feet")) {
+					armor = ItemStack.fromNbt(nbt.getCompound("feet"));
 				}
-				if (armor != null) {
-					if (ITEM_COLORS.containsKey(armor.getItem())) {
-						return ITEM_COLORS.get(armor.getItem());
-					}
-					if (armor.getItem() instanceof ArmorItem) {
-						ArmorItem item = (ArmorItem) armor.getItem();
-						ArmorMaterial material = item.getMaterial();
-						if (item instanceof DyeableArmorItem) {
-							DyeableArmorItem dye = (DyeableArmorItem) item;
-							if (dye.hasColor(armor)) {
-								return dye.getColor(armor);
-							}
-						}
-						return ARMOR_COLORS.getOrDefault(material, -1);
-					}
+			} else if (tintIndex == 2) {
+				if (nbt.contains("legs")) {
+					armor = ItemStack.fromNbt(nbt.getCompound("legs"));
 				}
-				return -1;
+			} else if (tintIndex == 3) {
+				if (nbt.contains("chest")) {
+					armor = ItemStack.fromNbt(nbt.getCompound("chest"));
+				}
+			} else if (tintIndex == 4) {
+				if (nbt.contains("head")) {
+					armor = ItemStack.fromNbt(nbt.getCompound("head"));
+				}
 			}
-			
+			if (armor != null) {
+				if (ITEM_COLORS.containsKey(armor.getItem())) {
+					return ITEM_COLORS.get(armor.getItem());
+				}
+				if (armor.getItem() instanceof ArmorItem item) {
+					ArmorMaterial material = item.getMaterial();
+					if (item instanceof DyeableArmorItem dye) {
+						if (dye.hasColor(armor)) {
+							return dye.getColor(armor);
+						}
+					}
+					return ARMOR_COLORS.getOrDefault(material, -1);
+				}
+			}
+			return -1;
 		}, PocketToolsMain.POCKET_ARMOR_STAND);
 	}
 	

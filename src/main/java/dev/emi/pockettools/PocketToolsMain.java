@@ -1,15 +1,6 @@
 package dev.emi.pockettools;
 
-import dev.emi.pockettools.item.PocketArmorStand;
-import dev.emi.pockettools.item.PocketCactus;
-import dev.emi.pockettools.item.PocketComposter;
-import dev.emi.pockettools.item.PocketEndPortal;
-import dev.emi.pockettools.item.PocketEnderChest;
-import dev.emi.pockettools.item.PocketFurnace;
-import dev.emi.pockettools.item.PocketGrindstone;
-import dev.emi.pockettools.item.PocketJukebox;
-import dev.emi.pockettools.item.PocketNoteBlock;
-import dev.emi.pockettools.item.PocketStonecutter;
+import dev.emi.pockettools.item.*;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.minecraft.item.Item;
@@ -27,7 +18,7 @@ public class PocketToolsMain implements ModInitializer {
 	public static final ItemGroup POCKET_GROUP = FabricItemGroupBuilder.build(new Identifier("pockettools", "pockettools"), () -> {
 		return new ItemStack(PocketToolsMain.POCKET_CACTUS);
 	});
-		
+
 	public static final Item POCKET_FURNACE = new PocketFurnace<SmeltingRecipe>(RecipeType.SMELTING, new Item.Settings().maxCount(1).group(POCKET_GROUP));
 	public static final Item POCKET_BLAST_FURNACE = new PocketFurnace<BlastingRecipe>(RecipeType.BLASTING, new Item.Settings().maxCount(1).group(POCKET_GROUP));
 	public static final Item POCKET_SMOKER = new PocketFurnace<SmokingRecipe>(RecipeType.SMOKING, new Item.Settings().maxCount(1).group(POCKET_GROUP));

@@ -1,7 +1,8 @@
 package dev.emi.pockettools.item;
 
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.StackReference;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.Slot;
@@ -14,12 +15,12 @@ public class PocketCactus extends Item {
 	}
 	
 	@Override
-	public boolean onClicked(ItemStack self, ItemStack stack, Slot slot, ClickType clickType, PlayerInventory playerInventory) {
+	public boolean onClicked(ItemStack self, ItemStack stack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursor) {
 		if (clickType == ClickType.RIGHT) {
 			if (stack.isEmpty()) {
-				playerInventory.player.damage(DamageSource.CACTUS, 1f);
+				player.damage(DamageSource.CACTUS, 1f);
 			} else {
-				playerInventory.setCursorStack(ItemStack.EMPTY);
+				cursor.set(ItemStack.EMPTY);
 			}
 			return true;
 		}
@@ -27,7 +28,7 @@ public class PocketCactus extends Item {
 	}
 
 	@Override
-	public boolean onStackClicked(ItemStack self, Slot slot, ClickType clickType, PlayerInventory playerInventory) {
+	public boolean onStackClicked(ItemStack self, Slot slot, ClickType clickType, PlayerEntity player) {
 		ItemStack stack = slot.getStack();
 		if (clickType == ClickType.RIGHT) {
 			if (!stack.isEmpty()) {

@@ -1,13 +1,10 @@
 package dev.emi.pockettools.item;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.ExperienceOrbEntity;
-import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.StackReference;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -17,6 +14,10 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ClickType;
 import net.minecraft.world.World;
 
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+
 public class PocketGrindstone extends Item {
 
 	public PocketGrindstone(Settings settings) {
@@ -24,14 +25,14 @@ public class PocketGrindstone extends Item {
 	}
 	
 	@Override
-	public boolean onClicked(ItemStack stack, ItemStack applied, Slot slot, ClickType arg, PlayerInventory playerInventory) {
-		if (arg == ClickType.RIGHT && (applied.hasEnchantments() || applied.isOf(Items.ENCHANTED_BOOK))) {
-			World world = playerInventory.player.world;
-			if (!world.isClient) {
-				ExperienceOrbEntity.spawn((ServerWorld) world, playerInventory.player.getPos(), getExperience(applied, world));
+	public boolean onClicked(ItemStack stack, ItemStack applied, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursor) {
+		if (clickType == ClickType.RIGHT && (applied.hasEnchantments() || applied.isOf(Items.ENCHANTED_BOOK))) {
+			World world = player.world;
+			if (!world.isClient()) {
+				ExperienceOrbEntity.spawn((ServerWorld) world, player.getPos(), getExperience(applied, world));
 			}
-			playerInventory.setCursorStack(grind(applied));
-			world.syncWorldEvent(1042, playerInventory.player.getBlockPos(), 0);
+			cursor.set(grind(applied));
+			world.syncWorldEvent(1042, player.getBlockPos(), 0);
 			return true;
 		}
 		return false;
@@ -39,12 +40,12 @@ public class PocketGrindstone extends Item {
 
 	private ItemStack grind(ItemStack stack) {
 		ItemStack copy = stack.copy();
-		stack.removeSubTag("Enchantments");
-		stack.removeSubTag("StoredEnchantments");
+		stack.removeSubNbt("Enchantments");
+		stack.removeSubNbt("StoredEnchantments");
 
-		Map<Enchantment, Integer> map = EnchantmentHelper.get(copy).entrySet().stream().filter((entry) -> {
-			return ((Enchantment)entry.getKey()).isCursed();
-		}).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+		Map<Enchantment, Integer> map = EnchantmentHelper.get(copy).entrySet().stream()
+				.filter(entry -> entry.getKey().isCursed())
+				.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 		EnchantmentHelper.set(map, stack);
 		stack.setRepairCost(0);
 		if (stack.isOf(Items.ENCHANTED_BOOK) && map.size() == 0) {
@@ -63,12 +64,10 @@ public class PocketGrindstone extends Item {
 	private int getExperience(ItemStack stack, World world) {
 		int i = 0;
 		Map<Enchantment, Integer> map = EnchantmentHelper.get(stack);
-		Iterator<Map.Entry<Enchantment, Integer>> iterator = map.entrySet().iterator();
 
-		while(iterator.hasNext()) {
-			Map.Entry<Enchantment, Integer> entry = iterator.next();
-			Enchantment enchantment = (Enchantment)entry.getKey();
-			Integer integer = (Integer)entry.getValue();
+		for (Entry entry : map.entrySet()) {
+			Enchantment enchantment = (Enchantment) entry.getKey();
+			Integer integer = (Integer) entry.getValue();
 			if (!enchantment.isCursed()) {
 				i += enchantment.getMinPower(integer);
 			}
