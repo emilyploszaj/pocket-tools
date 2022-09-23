@@ -1,5 +1,7 @@
 package dev.emi.pockettools.item;
 
+import java.util.List;
+
 import net.minecraft.block.enums.Instrument;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.player.PlayerEntity;
@@ -7,15 +9,18 @@ import net.minecraft.inventory.StackReference;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.sound.SoundCategory;
-import net.minecraft.text.*;
+import net.minecraft.text.LiteralTextContent;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
+import net.minecraft.text.TextColor;
 import net.minecraft.util.ClickType;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-
-import java.util.List;
 
 public class PocketNoteBlock extends Item {
 	public static final String[] NOTE_NAMES = {
@@ -32,6 +37,7 @@ public class PocketNoteBlock extends Item {
 		NbtCompound nbt = self.getOrCreateNbt();
 		if (clickType == ClickType.RIGHT) {
 			if (stack.isEmpty()) {
+				setInstrument(self, Items.DIRT.getDefaultStack());
 				playNote(player, self);
 				return true;
 			} else if (stack.getItem() instanceof BlockItem) {
