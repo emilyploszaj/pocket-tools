@@ -1,0 +1,58 @@
+{
+	"parent": "minecraft:recipes/root",
+	"rewards": {
+		"recipes": [
+			"pockettools:pocket_composter"
+		]
+	},
+	"criteria": {
+		"has_self": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": [
+							"pockettools:pocket_composter"
+						]
+					}
+				]
+			}
+		},
+		"has_the_recipe": {
+			"trigger": "minecraft:recipe_unlocked",
+			"conditions": {
+				"recipe": "pockettools:pocket_composter"
+			}
+		},
+		"has_composter": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": [
+							"minecraft:composter"
+						]
+					}
+				]
+			}
+		},
+		"has_wooden_slabs": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"tag": "minecraft:wooden_slabs"
+					}
+				]
+			}
+		}
+	},
+	"requirements": [
+		[
+			"has_self",
+			"has_the_recipe",
+			"has_composter",
+			"has_wooden_slabs"
+		]
+	]
+}

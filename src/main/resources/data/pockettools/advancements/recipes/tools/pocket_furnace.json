@@ -1,0 +1,60 @@
+{
+	"parent": "minecraft:recipes/root",
+	"rewards": {
+		"recipes": [
+			"pockettools:pocket_furnace"
+		]
+	},
+	"criteria": {
+		"has_self": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": [
+							"pockettools:pocket_furnace"
+						]
+					}
+				]
+			}
+		},
+		"has_the_recipe": {
+			"trigger": "minecraft:recipe_unlocked",
+			"conditions": {
+				"recipe": "pockettools:pocket_furnace"
+			}
+		},
+		"has_furnace": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": [
+							"minecraft:furnace"
+						]
+					}
+				]
+			}
+		},
+		"has_cobblestone_slab": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": [
+							"minecraft:cobblestone_slab"
+						]
+					}
+				]
+			}
+		}
+	},
+	"requirements": [
+		[
+			"has_self",
+			"has_the_recipe",
+			"has_furnace",
+			"has_cobblestone_slab"
+		]
+	]
+}

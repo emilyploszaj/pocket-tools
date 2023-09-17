@@ -1,16 +1,11 @@
 package dev.emi.pockettools.item;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import dev.emi.pockettools.item.PocketFurnace.PocketFurnaceTooltip;
 import dev.emi.pockettools.tooltip.ConvertibleTooltipData;
 import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.item.TooltipData;
-import net.minecraft.client.render.item.ItemRenderer;
-import net.minecraft.client.texture.TextureManager;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.SimpleInventory;
@@ -121,9 +116,11 @@ public class PocketFurnace<T extends AbstractCookingRecipe> extends Item {
 					Optional<T> recipe = world.getRecipeManager().getFirstMatch(type,
 							new SimpleInventory(input), world);
 					if (recipe.isPresent()) {
+						ItemStack recipeOutput = recipe.get().getOutput(world.getRegistryManager());
+
 						if (output.isEmpty()) {
-							output = recipe.get().getOutput().copy();
-						} else if (output.isItemEqual(recipe.get().getOutput())) {
+							output = recipeOutput.copy();
+						} else if (ItemStack.areItemsEqual(output, recipeOutput)) {
 							output.increment(1);
 						}
 						nbt.put("output", output.writeNbt(new NbtCompound()));
@@ -144,7 +141,7 @@ public class PocketFurnace<T extends AbstractCookingRecipe> extends Item {
 				if (output.getCount() < output.getMaxCount() && input.getCount() > 0) {
 					Optional<T> recipe = world.getRecipeManager().getFirstMatch(type,
 							new SimpleInventory(input), world);
-					if (recipe.isPresent() && (output.isEmpty() || (output.isItemEqual(recipe.get().getOutput())
+					if (recipe.isPresent() && (output.isEmpty() || (ItemStack.areItemsEqual(output, recipe.get().getOutput(world.getRegistryManager()))
 							&& output.getCount() < output.getMaxCount()))) {
 						cookTime = recipe.get().getCookTime();
 						nbt.putInt("cookTime", cookTime);
@@ -160,7 +157,7 @@ public class PocketFurnace<T extends AbstractCookingRecipe> extends Item {
 
 	@Override
 	public boolean onClicked(ItemStack stack, ItemStack applied, Slot slot, ClickType clickType,
-							 PlayerEntity player, StackReference cursor) {
+			PlayerEntity player, StackReference cursor) {
 		NbtCompound nbt = stack.getOrCreateNbt();
 		if (clickType == ClickType.RIGHT) {
 			if (applied.isEmpty()) {
@@ -175,8 +172,8 @@ public class PocketFurnace<T extends AbstractCookingRecipe> extends Item {
 			if (nbt.contains("input")) {
 				input = ItemStack.fromNbt(nbt.getCompound("input"));
 			}
-			if ((!input.isEmpty() && input.isItemEqual(applied))
-					|| (input.isEmpty() && isSmeltable(player.world, applied))) {
+			if ((!input.isEmpty() && ItemStack.areItemsEqual(input, applied))
+					|| (input.isEmpty() && isSmeltable(player.getWorld(), applied))) {
 				if (input.isEmpty()) {
 					input = applied.copy();
 					applied.setCount(0);
@@ -197,7 +194,7 @@ public class PocketFurnace<T extends AbstractCookingRecipe> extends Item {
 			if (nbt.contains("fuel")) {
 				fuel = ItemStack.fromNbt(nbt.getCompound("fuel"));
 			}
-			if ((!fuel.isEmpty() && fuel.isItemEqual(applied))
+			if ((!fuel.isEmpty() && ItemStack.areItemsEqual(fuel, applied))
 					|| (fuel.isEmpty() && AbstractFurnaceBlockEntity.canUseAsFuel(applied))) {
 				if (fuel.isEmpty()) {
 					fuel = applied.copy();
@@ -253,9 +250,7 @@ public class PocketFurnace<T extends AbstractCookingRecipe> extends Item {
 		}
 
 		@Override
-		public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer, int z) {
-			matrices.push();
-
+		public void drawItems(TextRenderer textRenderer, int x, int y, DrawContext context) {
 			NbtCompound nbt = stack.getOrCreateNbt();
 			ItemStack input = ItemStack.EMPTY;
 			ItemStack fuel = ItemStack.EMPTY;
@@ -285,24 +280,23 @@ public class PocketFurnace<T extends AbstractCookingRecipe> extends Item {
 			if (nbt.contains("maxCookTime")) {
 				maxCookTime = nbt.getInt("maxCookTime");
 			}
-			itemRenderer.renderGuiItemIcon(input, x + 2, y + 2);
-			itemRenderer.renderGuiItemOverlay(textRenderer, input, x + 2, y + 2);
-			itemRenderer.renderGuiItemIcon(output, x + 48, y + 2);
-			itemRenderer.renderGuiItemOverlay(textRenderer, output, x + 48, y + 2);
-			itemRenderer.renderGuiItemIcon(fuel, x + 2, y + 20);
-			itemRenderer.renderGuiItemOverlay(textRenderer, fuel, x + 2, y + 20);
-			RenderSystem.setShaderColor(1.f, 1.f, 1.f, 1.f);
-			RenderSystem.setShaderTexture(0, FURNACE);
+			this.renderGuiItem(context, textRenderer, input, x + 2, y + 1);
+			this.renderGuiItem(context, textRenderer, output, x + 48, y + 2);
+			this.renderGuiItem(context, textRenderer, fuel, x + 2, y + 20);
+			context.setShaderColor(1.f, 1.f, 1.f, 1.f);
 			if (maxFuelTime > 0) {
 				int fuelProgress = fuelTime * 13 / maxFuelTime;
-				DrawableHelper.drawTexture(matrices, x + 26, y + 36 - fuelProgress, z, 0, 13 - fuelProgress, 13, fuelProgress + 1, 256, 256);
+				context.drawTexture(FURNACE, x + 26, y + 36 - fuelProgress, 0, 13 - fuelProgress, 13, fuelProgress + 1, 256, 256);
 			}
 			if (cookTime > 0 && maxCookTime > 0) {
 				int cookProgress = 22 - (cookTime * 22 / maxCookTime);
-				DrawableHelper.drawTexture(matrices, x + 22, y + 3, z, 0, 13, cookProgress, 15, 256, 256);
+				context.drawTexture(FURNACE, x + 22, y + 3, 0, 13, cookProgress, 15, 256, 256);
 			}
+		}
 
-			matrices.pop();
+		private void renderGuiItem(DrawContext context, TextRenderer textRenderer, ItemStack stack, int x, int y) {
+			context.drawItem(stack, x, y);
+			context.drawItemInSlot(textRenderer, stack, x, y);
 		}
 	}
 }

@@ -1,0 +1,60 @@
+{
+	"parent": "minecraft:recipes/root",
+	"rewards": {
+		"recipes": [
+			"pockettools:pocket_smoker"
+		]
+	},
+	"criteria": {
+		"has_self": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": [
+							"pockettools:pocket_smoker"
+						]
+					}
+				]
+			}
+		},
+		"has_the_recipe": {
+			"trigger": "minecraft:recipe_unlocked",
+			"conditions": {
+				"recipe": "pockettools:pocket_smoker"
+			}
+		},
+		"has_smoker": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": [
+							"minecraft:smoker"
+						]
+					}
+				]
+			}
+		},
+		"has_stone_slab": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": [
+							"minecraft:stone_slab"
+						]
+					}
+				]
+			}
+		}
+	},
+	"requirements": [
+		[
+			"has_self",
+			"has_the_recipe",
+			"has_smoker",
+			"has_stone_slab"
+		]
+	]
+}

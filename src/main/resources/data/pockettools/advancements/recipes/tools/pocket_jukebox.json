@@ -1,0 +1,58 @@
+{
+	"parent": "minecraft:recipes/root",
+	"rewards": {
+		"recipes": [
+			"pockettools:pocket_jukebox"
+		]
+	},
+	"criteria": {
+		"has_self": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": [
+							"pockettools:pocket_jukebox"
+						]
+					}
+				]
+			}
+		},
+		"has_the_recipe": {
+			"trigger": "minecraft:recipe_unlocked",
+			"conditions": {
+				"recipe": "pockettools:pocket_jukebox"
+			}
+		},
+		"has_jukebox": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": [
+							"minecraft:jukebox"
+						]
+					}
+				]
+			}
+		},
+		"has_wooden_slabs": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"tag": "minecraft:wooden_slabs"
+					}
+				]
+			}
+		}
+	},
+	"requirements": [
+		[
+			"has_self",
+			"has_the_recipe",
+			"has_jukebox",
+			"has_wooden_slabs"
+		]
+	]
+}

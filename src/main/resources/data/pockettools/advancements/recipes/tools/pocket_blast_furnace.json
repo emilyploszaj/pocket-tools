@@ -1,0 +1,60 @@
+{
+	"parent": "minecraft:recipes/root",
+	"rewards": {
+		"recipes": [
+			"pockettools:pocket_blast_furnace"
+		]
+	},
+	"criteria": {
+		"has_self": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": [
+							"pockettools:pocket_blast_furnace"
+						]
+					}
+				]
+			}
+		},
+		"has_the_recipe": {
+			"trigger": "minecraft:recipe_unlocked",
+			"conditions": {
+				"recipe": "pockettools:pocket_blast_furnace"
+			}
+		},
+		"has_blast_furnace": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": [
+							"minecraft:blast_furnace"
+						]
+					}
+				]
+			}
+		},
+		"has_smooth_stone_slab": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": [
+							"minecraft:smooth_stone_slab"
+						]
+					}
+				]
+			}
+		}
+	},
+	"requirements": [
+		[
+			"has_self",
+			"has_the_recipe",
+			"has_blast_furnace",
+			"has_smooth_stone_slab"
+		]
+	]
+}

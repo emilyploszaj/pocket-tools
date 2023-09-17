@@ -57,7 +57,7 @@ public class PocketJukebox extends Item {
 	public boolean onClicked(ItemStack self, ItemStack stack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursor) {
 		NbtCompound nbt = self.getOrCreateNbt();
 		if (clickType == ClickType.RIGHT) {
-			World world = player.world;
+			World world = player.getWorld();
 			if (nbt.contains("disc")) {
 				if (stack.isEmpty()) {
 					cursor.set(ItemStack.fromNbt(nbt.getCompound("disc")));

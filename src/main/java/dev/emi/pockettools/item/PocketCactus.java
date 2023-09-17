@@ -1,6 +1,5 @@
 package dev.emi.pockettools.item;
 
-import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.StackReference;
 import net.minecraft.item.Item;
@@ -13,12 +12,12 @@ public class PocketCactus extends Item {
 	public PocketCactus(Settings settings) {
 		super(settings);
 	}
-	
+
 	@Override
 	public boolean onClicked(ItemStack self, ItemStack stack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursor) {
 		if (clickType == ClickType.RIGHT) {
 			if (stack.isEmpty()) {
-				player.damage(DamageSource.CACTUS, 1f);
+				player.damage(player.getDamageSources().cactus(), 1f);
 			} else {
 				cursor.set(ItemStack.EMPTY);
 			}

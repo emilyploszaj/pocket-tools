@@ -1,0 +1,59 @@
+{
+	"parent": "minecraft:recipes/root",
+	"rewards": {
+		"recipes": [
+			"pockettools:pocket_end_portal"
+		]
+	},
+	"criteria": {
+		"has_self": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": [
+							"pockettools:pocket_end_portal"
+						]
+					}
+				]
+			}
+		},
+		"has_the_recipe": {
+			"trigger": "minecraft:recipe_unlocked",
+			"conditions": {
+				"recipe": "pockettools:pocket_end_portal"
+			}
+		},
+		"has_ingredients": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": [
+							"minecraft:end_crystal"
+						]
+					},
+					{
+						"items": [
+							"minecraft:end_stone_brick_slab"
+						]
+					}
+				]
+			}
+		},
+		"entered_end": {
+			"conditions": {
+				"to": "minecraft:the_end"
+			},
+			"trigger": "minecraft:changed_dimension"
+		}
+	},
+	"requirements": [
+		[
+			"has_self",
+			"has_the_recipe",
+			"has_ingredients",
+			"entered_end"
+		]
+	]
+}
