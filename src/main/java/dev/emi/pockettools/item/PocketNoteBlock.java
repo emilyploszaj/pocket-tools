@@ -1,7 +1,5 @@
 package dev.emi.pockettools.item;
 
-import java.util.List;
-
 import net.minecraft.block.enums.Instrument;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.player.PlayerEntity;
@@ -13,37 +11,34 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.sound.SoundCategory;
-import net.minecraft.text.LiteralTextContent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.text.TextColor;
+import net.minecraft.text.*;
 import net.minecraft.util.ClickType;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
+import java.util.List;
+
 public class PocketNoteBlock extends Item {
 	public static final String[] NOTE_NAMES = {
-		"F#", "G", "G#", "A", "A#", "B", "C", "C#", "D", "D#", "E", "F",
-		"F#", "G", "G#", "A", "A#", "B", "C", "C#", "D", "D#", "E", "F"
+			"F#", "G", "G#", "A", "A#", "B", "C", "C#", "D", "D#", "E", "F",
+			"F#", "G", "G#", "A", "A#", "B", "C", "C#", "D", "D#", "E", "F"
 	};
 
 	public PocketNoteBlock(Settings settings) {
 		super(settings);
 	}
-	
+
 	@Override
 	public boolean onClicked(ItemStack self, ItemStack stack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursor) {
 		NbtCompound nbt = self.getOrCreateNbt();
 		if (clickType == ClickType.RIGHT) {
 			if (stack.isEmpty()) {
-				setInstrument(self, Items.DIRT.getDefaultStack());
 				playNote(player, self);
 				return true;
 			} else if (stack.getItem() instanceof BlockItem) {
 				if (nbt.contains("instrument")) {
 					Instrument instrument = getInstrument(self);
-					Instrument newInstrument = Instrument.fromBlockState(((BlockItem) stack.getItem()).getBlock().getDefaultState());
+					Instrument newInstrument = ((BlockItem) stack.getItem()).getBlock().getDefaultState().getInstrument();
 					if (!instrument.equals(newInstrument)) {
 						setInstrument(self, stack);
 					} else {
@@ -67,7 +62,7 @@ public class PocketNoteBlock extends Item {
 			pitch = tag.getInt("pitch");
 		}
 		float f = (float) Math.pow(2.0D, (pitch - 12) / 12.0D);
-		player.world.playSound(player, player.getBlockPos(), instrument.getSound(), SoundCategory.RECORDS, 3.0F, f);
+		player.playSound(instrument.getSound().value(), SoundCategory.RECORDS, 3.0F, f);
 	}
 
 	public Instrument getInstrument(ItemStack stack) {
@@ -76,17 +71,17 @@ public class PocketNoteBlock extends Item {
 		if (nbt.contains("instrument")) {
 			var ins = ItemStack.fromNbt(nbt.getCompound("instrument"));
 			if (ins.getItem() instanceof BlockItem blockItem)
-				instrument = Instrument.fromBlockState(blockItem.getBlock().getDefaultState());
+				instrument = blockItem.getBlock().getDefaultState().getInstrument();
 		}
 		return instrument;
 	}
-	
+
 	public void setInstrument(ItemStack self, ItemStack instrument) {
 		NbtCompound nbt = self.getOrCreateNbt();
 		nbt.put("instrument", instrument.writeNbt(new NbtCompound()));
 		nbt.putInt("pitch", 0);
 	}
-	
+
 	public void pitchUp(ItemStack stack) {
 		NbtCompound nbt = stack.getOrCreateNbt();
 		int pitch = -1;

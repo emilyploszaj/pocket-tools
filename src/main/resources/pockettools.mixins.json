@@ -6,9 +6,6 @@
     "ItemEntityMixin",
     "SlotMixin"
   ],
-  "client": [
-    "ScreenMixin"
-  ],
   "injectors": {
     "defaultRequire": 1
   }

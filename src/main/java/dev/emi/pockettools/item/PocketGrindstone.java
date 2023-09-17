@@ -27,7 +27,7 @@ public class PocketGrindstone extends Item {
 	@Override
 	public boolean onClicked(ItemStack stack, ItemStack applied, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursor) {
 		if (clickType == ClickType.RIGHT && (applied.hasEnchantments() || applied.isOf(Items.ENCHANTED_BOOK))) {
-			World world = player.world;
+			World world = player.getWorld();
 			if (!world.isClient()) {
 				ExperienceOrbEntity.spawn((ServerWorld) world, player.getPos(), getExperience(applied, world));
 			}
@@ -48,7 +48,7 @@ public class PocketGrindstone extends Item {
 				.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 		EnchantmentHelper.set(map, stack);
 		stack.setRepairCost(0);
-		if (stack.isOf(Items.ENCHANTED_BOOK) && map.size() == 0) {
+		if (stack.isOf(Items.ENCHANTED_BOOK) && map.isEmpty()) {
 			stack = new ItemStack(Items.BOOK);
 			if (copy.hasCustomName()) {
 				stack.setCustomName(copy.getName());

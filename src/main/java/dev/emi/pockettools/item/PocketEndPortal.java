@@ -8,12 +8,12 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.ClickType;
-import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 
 public class PocketEndPortal extends Item {
@@ -42,7 +42,7 @@ public class PocketEndPortal extends Item {
 	@Override
 	public boolean onClicked(ItemStack self, ItemStack stack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursor) {
 		NbtCompound nbt = self.getOrCreateNbt();
-		World world = player.world;
+		World world = player.getWorld();
 		if (clickType == ClickType.RIGHT) {
 			if (nbt.contains("portal") && nbt.getBoolean("portal")) {
 				if (!world.isClient) {
@@ -155,7 +155,7 @@ public class PocketEndPortal extends Item {
 		stack.setNbt(nbt);
 		playerInventory.setStack(i, stack);
 		playerInventory.offerOrDrop(temp);
-		if (playerInventory.player.world.isClient) {
+		if (playerInventory.player.getWorld().isClient()) {
 			playerInventory.player.playSound(SoundEvents.BLOCK_END_PORTAL_SPAWN, SoundCategory.BLOCKS, 1f, 1f);
 		}
 	}

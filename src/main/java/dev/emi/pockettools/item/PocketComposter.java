@@ -82,7 +82,7 @@ public class PocketComposter extends Item {
 	@Override
 	public boolean onClicked(ItemStack stack, ItemStack applied, Slot slot, ClickType arg, PlayerEntity player, StackReference cursor) {
 		if (arg == ClickType.RIGHT) {
-			World world = player.world;
+			World world = player.getWorld();
 			NbtCompound nbt = stack.getOrCreateNbt();
 			int fill = 0;
 			if (nbt.contains("fill")) {

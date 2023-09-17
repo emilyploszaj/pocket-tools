@@ -2,49 +2,53 @@ package dev.emi.pockettools;
 
 import dev.emi.pockettools.item.*;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
+import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.BlastingRecipe;
 import net.minecraft.recipe.RecipeType;
-import net.minecraft.recipe.SmeltingRecipe;
-import net.minecraft.recipe.SmokingRecipe;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
 
 public class PocketToolsMain implements ModInitializer {
+	public static final String NAMESPACE = "pockettools";
 
-	public static final ItemGroup POCKET_GROUP = FabricItemGroupBuilder.build(new Identifier("pockettools", "pockettools"), () -> {
-		return new ItemStack(PocketToolsMain.POCKET_CACTUS);
-	});
+	private static final List<Item> ITEMS = new ArrayList<>();
 
-	public static final Item POCKET_FURNACE = new PocketFurnace<SmeltingRecipe>(RecipeType.SMELTING, new Item.Settings().maxCount(1).group(POCKET_GROUP));
-	public static final Item POCKET_BLAST_FURNACE = new PocketFurnace<BlastingRecipe>(RecipeType.BLASTING, new Item.Settings().maxCount(1).group(POCKET_GROUP));
-	public static final Item POCKET_SMOKER = new PocketFurnace<SmokingRecipe>(RecipeType.SMOKING, new Item.Settings().maxCount(1).group(POCKET_GROUP));
-	public static final Item POCKET_GRINDSTONE = new PocketGrindstone(new Item.Settings().maxCount(1).group(POCKET_GROUP));
-	public static final Item POCKET_COMPOSTER = new PocketComposter(new Item.Settings().maxCount(1).group(POCKET_GROUP));
-	public static final Item POCKET_END_PORTAL = new PocketEndPortal(new Item.Settings().maxCount(1).group(POCKET_GROUP));
-	public static final Item POCKET_NOTE_BLOCK = new PocketNoteBlock(new Item.Settings().maxCount(1).group(POCKET_GROUP));
-	public static final Item POCKET_JUKEBOX = new PocketJukebox(new Item.Settings().maxCount(1).group(POCKET_GROUP));
-	public static final Item POCKET_ARMOR_STAND = new PocketArmorStand(new Item.Settings().maxCount(1).group(POCKET_GROUP));
-	public static final Item POCKET_CACTUS = new PocketCactus(new Item.Settings().maxCount(1).group(POCKET_GROUP));
-	public static final Item POCKET_STONECUTTER = new PocketStonecutter(new Item.Settings().maxCount(1).group(POCKET_GROUP));
-	public static final Item POCKET_ENDER_CHEST = new PocketEnderChest(new Item.Settings().maxCount(1).group(POCKET_GROUP));
+	public static final Item POCKET_FURNACE = item("pocket_furnace", settings -> new PocketFurnace<>(RecipeType.SMELTING, settings));
+	public static final Item POCKET_BLAST_FURNACE = item("pocket_blast_furnace", settings -> new PocketFurnace<>(RecipeType.BLASTING, settings));
+	public static final Item POCKET_SMOKER = item("pocket_smoker", settings -> new PocketFurnace<>(RecipeType.SMOKING, settings));
+	public static final Item POCKET_GRINDSTONE = item("pocket_grindstone", PocketGrindstone::new);
+	public static final Item POCKET_COMPOSTER = item("pocket_composter", PocketComposter::new);
+	public static final Item POCKET_END_PORTAL = item("pocket_end_portal", PocketEndPortal::new);
+	public static final Item POCKET_NOTE_BLOCK = item("pocket_note_block", PocketNoteBlock::new);
+	public static final Item POCKET_JUKEBOX = item("pocket_jukebox", PocketJukebox::new);
+	public static final Item POCKET_ARMOR_STAND = item("pocket_armor_stand", PocketArmorStand::new);
+	public static final Item POCKET_CACTUS = item("pocket_cactus", PocketCactus::new);
+	public static final Item POCKET_STONECUTTER = item("pocket_stonecutter", PocketStonecutter::new);
+	public static final Item POCKET_ENDER_CHEST = item("pocket_ender_chest", PocketEnderChest::new);
+
+	public static final ItemGroup POCKET_GROUP = Registry.register(Registries.ITEM_GROUP, new Identifier(NAMESPACE, "pockettools"),
+			FabricItemGroup.builder()
+					.displayName(Text.translatable("itemGroup.pockettools.pockettools"))
+					.icon(() -> new ItemStack(PocketToolsMain.POCKET_CACTUS))
+					.entries((displayContext, entries) -> entries.addAll(ITEMS.stream().map(ItemStack::new).toList()))
+					.build()
+	);
 
 	@Override
 	public void onInitialize() {
-		Registry.register(Registry.ITEM, new Identifier("pockettools", "pocket_furnace"), POCKET_FURNACE);
-		Registry.register(Registry.ITEM, new Identifier("pockettools", "pocket_blast_furnace"), POCKET_BLAST_FURNACE);
-		Registry.register(Registry.ITEM, new Identifier("pockettools", "pocket_smoker"), POCKET_SMOKER);
-		Registry.register(Registry.ITEM, new Identifier("pockettools", "pocket_grindstone"), POCKET_GRINDSTONE);
-		Registry.register(Registry.ITEM, new Identifier("pockettools", "pocket_composter"), POCKET_COMPOSTER);
-		Registry.register(Registry.ITEM, new Identifier("pockettools", "pocket_end_portal"), POCKET_END_PORTAL);
-		Registry.register(Registry.ITEM, new Identifier("pockettools", "pocket_note_block"), POCKET_NOTE_BLOCK);
-		Registry.register(Registry.ITEM, new Identifier("pockettools", "pocket_jukebox"), POCKET_JUKEBOX);
-		Registry.register(Registry.ITEM, new Identifier("pockettools", "pocket_armor_stand"), POCKET_ARMOR_STAND);
-		Registry.register(Registry.ITEM, new Identifier("pockettools", "pocket_cactus"), POCKET_CACTUS);
-		Registry.register(Registry.ITEM, new Identifier("pockettools", "pocket_stonecutter"), POCKET_STONECUTTER);
-		Registry.register(Registry.ITEM, new Identifier("pockettools", "pocket_ender_chest"), POCKET_ENDER_CHEST);
+	}
+
+	private static <T extends Item> T item(String name, Function<Item.Settings, T> itemCreator) {
+		T item = itemCreator.apply(new Item.Settings().maxCount(1));
+		ITEMS.add(item);
+		return Registry.register(Registries.ITEM, new Identifier(NAMESPACE, name), item);
 	}
 }

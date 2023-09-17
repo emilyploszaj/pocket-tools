@@ -1,8 +1,11 @@
 package dev.emi.pockettools;
 
+import dev.emi.pockettools.tooltip.ConvertibleTooltipData;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.TooltipComponentCallback;
 import net.minecraft.item.*;
+import net.minecraft.util.math.ColorHelper;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.HashMap;
@@ -15,21 +18,21 @@ public class PocketToolsClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
-		ARMOR_COLORS.put(ArmorMaterials.LEATHER, MathHelper.packRgb(112, 71, 45));
-		ARMOR_COLORS.put(ArmorMaterials.IRON, MathHelper.packRgb(198, 198, 198));
-		ARMOR_COLORS.put(ArmorMaterials.CHAIN, MathHelper.packRgb(150, 150, 150));
-		ARMOR_COLORS.put(ArmorMaterials.GOLD, MathHelper.packRgb(234, 237, 87));
-		ARMOR_COLORS.put(ArmorMaterials.DIAMOND, MathHelper.packRgb(74, 237, 217));
-		ARMOR_COLORS.put(ArmorMaterials.NETHERITE, MathHelper.packRgb(77, 73, 77));
-		ARMOR_COLORS.put(ArmorMaterials.TURTLE, MathHelper.packRgb(49, 118, 63));
-		ITEM_COLORS.put(Items.CARVED_PUMPKIN, MathHelper.packRgb(212, 114, 17));
-		ITEM_COLORS.put(Items.ELYTRA, MathHelper.packRgb(127, 127, 152));
-		ITEM_COLORS.put(Items.WITHER_SKELETON_SKULL, MathHelper.packRgb(41, 41, 41));
-		ITEM_COLORS.put(Items.DRAGON_HEAD, MathHelper.packRgb(41, 33, 41));
-		ITEM_COLORS.put(Items.CREEPER_HEAD, MathHelper.packRgb(19, 169, 16));
-		ITEM_COLORS.put(Items.PLAYER_HEAD, MathHelper.packRgb(200, 150, 128));
-		ITEM_COLORS.put(Items.SKELETON_SKULL, MathHelper.packRgb(188, 188, 188));
-		ITEM_COLORS.put(Items.ZOMBIE_HEAD, MathHelper.packRgb(62, 105, 45));
+		ARMOR_COLORS.put(ArmorMaterials.LEATHER, ColorHelper.Argb.getArgb(255, 112, 71, 45));
+		ARMOR_COLORS.put(ArmorMaterials.IRON, ColorHelper.Argb.getArgb(255, 198, 198, 198));
+		ARMOR_COLORS.put(ArmorMaterials.CHAIN, ColorHelper.Argb.getArgb(255, 150, 150, 150));
+		ARMOR_COLORS.put(ArmorMaterials.GOLD, ColorHelper.Argb.getArgb(255, 234, 237, 87));
+		ARMOR_COLORS.put(ArmorMaterials.DIAMOND, ColorHelper.Argb.getArgb(255, 74, 237, 217));
+		ARMOR_COLORS.put(ArmorMaterials.NETHERITE, ColorHelper.Argb.getArgb(255, 77, 73, 77));
+		ARMOR_COLORS.put(ArmorMaterials.TURTLE, ColorHelper.Argb.getArgb(255, 49, 118, 63));
+		ITEM_COLORS.put(Items.CARVED_PUMPKIN, ColorHelper.Argb.getArgb(255, 212, 114, 17));
+		ITEM_COLORS.put(Items.ELYTRA, ColorHelper.Argb.getArgb(255, 127, 127, 152));
+		ITEM_COLORS.put(Items.WITHER_SKELETON_SKULL, ColorHelper.Argb.getArgb(255, 41, 41, 41));
+		ITEM_COLORS.put(Items.DRAGON_HEAD, ColorHelper.Argb.getArgb(255, 41, 33, 41));
+		ITEM_COLORS.put(Items.CREEPER_HEAD, ColorHelper.Argb.getArgb(255, 19, 169, 16));
+		ITEM_COLORS.put(Items.PLAYER_HEAD, ColorHelper.Argb.getArgb(255, 200, 150, 128));
+		ITEM_COLORS.put(Items.SKELETON_SKULL, ColorHelper.Argb.getArgb(255, 188, 188, 188));
+		ITEM_COLORS.put(Items.ZOMBIE_HEAD, ColorHelper.Argb.getArgb(255, 62, 105, 45));
 		ColorProviderRegistry.ITEM.register((stack, tintIndex) -> {
 			var nbt = stack.getOrCreateNbt();
 			ItemStack armor = null;
@@ -66,6 +69,13 @@ public class PocketToolsClient implements ClientModInitializer {
 			}
 			return -1;
 		}, PocketToolsMain.POCKET_ARMOR_STAND);
+
+		TooltipComponentCallback.EVENT.register(data -> {
+			if (data instanceof ConvertibleTooltipData convertible) {
+				return convertible.getComponent();
+			}
+
+			return null;
+		});
 	}
-	
 }

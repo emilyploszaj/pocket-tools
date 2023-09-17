@@ -2,6 +2,7 @@ package dev.emi.pockettools.item;
 
 import dev.emi.pockettools.tooltip.ConvertibleTooltipData;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.item.TooltipData;
 import net.minecraft.client.render.item.ItemRenderer;
@@ -34,7 +35,7 @@ public class PocketArmorStand extends Item {
 
 	@Override
 	public boolean onClicked(ItemStack self, ItemStack otherStack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursor) {
-		World world = player.world;
+		World world = player.getWorld();
 		NbtCompound nbt = self.getOrCreateNbt();
 		if (clickType == ClickType.RIGHT) {
 			if (otherStack.isEmpty()) {
@@ -83,7 +84,7 @@ public class PocketArmorStand extends Item {
 	}
 
 	private ItemStack swapArmor(ItemStack self, ItemStack stack, EquipmentSlot es, NbtCompound tag, PlayerEntity player) {
-		var world = player.world;
+		var world = player.getWorld();
 		String name = es.getName();
 		var inner = ItemStack.EMPTY;
 		if (tag.contains(name)) {
@@ -164,28 +165,29 @@ public class PocketArmorStand extends Item {
 		}
 
 		@Override
-		public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer, int z) {
+		public void drawItems(TextRenderer textRenderer, int x, int y, DrawContext context) {
 			NbtCompound nbt = stack.getOrCreateNbt();
 			if (nbt.contains("head")) {
 				ItemStack stack = ItemStack.fromNbt(nbt.getCompound("head"));
-				itemRenderer.renderGuiItemIcon(stack, x + 2, y + 2);
-				itemRenderer.renderGuiItemOverlay(textRenderer, stack, x + 2, y + 2);
+				this.renderGuiItem(context, textRenderer, stack, x + 2, y + 2);
 			}
 			if (nbt.contains("chest")) {
 				ItemStack stack = ItemStack.fromNbt(nbt.getCompound("chest"));
-				itemRenderer.renderGuiItemIcon(stack, x + 18, y + 2);
-				itemRenderer.renderGuiItemOverlay(textRenderer, stack, x + 18, y + 2);
+				this.renderGuiItem(context, textRenderer, stack, x + 18, y + 2);
 			}
 			if (nbt.contains("legs")) {
 				ItemStack stack = ItemStack.fromNbt(nbt.getCompound("legs"));
-				itemRenderer.renderGuiItemIcon(stack, x + 34, y + 2);
-				itemRenderer.renderGuiItemOverlay(textRenderer, stack, x + 34, y + 2);
+				this.renderGuiItem(context, textRenderer, stack, x + 34, y + 2);
 			}
 			if (nbt.contains("feet")) {
 				ItemStack stack = ItemStack.fromNbt(nbt.getCompound("feet"));
-				itemRenderer.renderGuiItemIcon(stack, x + 50, y + 2);
-				itemRenderer.renderGuiItemOverlay(textRenderer, stack, x + 50, y + 2);
+				this.renderGuiItem(context, textRenderer, stack, x + 50, y + 2);
 			}
+		}
+
+		private void renderGuiItem(DrawContext context, TextRenderer textRenderer, ItemStack stack, int x, int y) {
+			context.drawItem(stack, x, y);
+			context.drawItemInSlot(textRenderer, stack, x, y);
 		}
 	}
 }
