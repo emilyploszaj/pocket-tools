@@ -41,7 +41,7 @@ processResources {
 
 jar {
 	from('LICENSE') {
-		rename { "${it}_${base.archivesNames.get()}" }
+		rename { "${it}_${base.archivesName.get()}" }
 	}
 }
 
