@@ -1,1 +1,104 @@
-{	"parent": "item/generated",	"textures": {		"layer0": "pockettools:item/pocket_cactus"	}}
+{
+	"parent": "item/generated",
+	"textures": {
+		"layer0": "pockettools:item/pocket_cactus"
+	},
+	"overrides": [
+		{
+			"predicate": {
+				"pockettools:friend": 0.01
+			},
+			"model": "pockettools:item/friend/white"
+		},
+		{
+			"predicate": {
+				"pockettools:friend": 0.02
+			},
+			"model": "pockettools:item/friend/orange"
+		},
+		{
+			"predicate": {
+				"pockettools:friend": 0.03
+			},
+			"model": "pockettools:item/friend/magenta"
+		},
+		{
+			"predicate": {
+				"pockettools:friend": 0.04
+			},
+			"model": "pockettools:item/friend/light_blue"
+		},
+		{
+			"predicate": {
+				"pockettools:friend": 0.05
+			},
+			"model": "pockettools:item/friend/yellow"
+		},
+		{
+			"predicate": {
+				"pockettools:friend": 0.06
+			},
+			"model": "pockettools:item/friend/lime"
+		},
+		{
+			"predicate": {
+				"pockettools:friend": 0.07
+			},
+			"model": "pockettools:item/friend/pink"
+		},
+		{
+			"predicate": {
+				"pockettools:friend": 0.08
+			},
+			"model": "pockettools:item/friend/gray"
+		},
+		{
+			"predicate": {
+				"pockettools:friend": 0.09
+			},
+			"model": "pockettools:item/friend/light_gray"
+		},
+		{
+			"predicate": {
+				"pockettools:friend": 0.10
+			},
+			"model": "pockettools:item/friend/cyan"
+		},
+		{
+			"predicate": {
+				"pockettools:friend": 0.11
+			},
+			"model": "pockettools:item/friend/purple"
+		},
+		{
+			"predicate": {
+				"pockettools:friend": 0.12
+			},
+			"model": "pockettools:item/friend/blue"
+		},
+		{
+			"predicate": {
+				"pockettools:friend": 0.13
+			},
+			"model": "pockettools:item/friend/brown"
+		},
+		{
+			"predicate": {
+				"pockettools:friend": 0.14
+			},
+			"model": "pockettools:item/friend/green"
+		},
+		{
+			"predicate": {
+				"pockettools:friend": 0.15
+			},
+			"model": "pockettools:item/friend/red"
+		},
+		{
+			"predicate": {
+				"pockettools:friend": 0.16
+			},
+			"model": "pockettools:item/friend/black"
+		}
+	]
+}

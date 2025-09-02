@@ -1,5 +1,9 @@
 package dev.emi.pockettools.item;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import dev.emi.pockettools.tooltip.ConvertibleTooltipData;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
@@ -22,10 +26,6 @@ import net.minecraft.util.ClickType;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 public class PocketStonecutter extends Item {
 
 	public PocketStonecutter(Settings settings) {
@@ -40,7 +40,7 @@ public class PocketStonecutter extends Item {
 			if (otherStack.isEmpty()) {
 				if (nbt.contains("base")) {
 					ItemStack base = ItemStack.fromNbt(nbt.getCompound("base"));
-					List list = world.getRecipeManager().getAllMatches(RecipeType.STONECUTTING, new SimpleInventory(base), world);
+					List<StonecuttingRecipe> list = world.getRecipeManager().getAllMatches(RecipeType.STONECUTTING, new SimpleInventory(base), world);
 					int offset = -1;
 					if (nbt.contains("offset")) {
 						offset = nbt.getInt("offset");
@@ -56,7 +56,7 @@ public class PocketStonecutter extends Item {
 					return true;
 				}
 			} else {
-				List list = world.getRecipeManager().getAllMatches(RecipeType.STONECUTTING, new SimpleInventory(otherStack), world);
+				List<StonecuttingRecipe> list = world.getRecipeManager().getAllMatches(RecipeType.STONECUTTING, new SimpleInventory(otherStack), world);
 				if (!list.isEmpty()) {
 					nbt.put("base", otherStack.writeNbt(new NbtCompound()));
 					nbt.putInt("offset", 0);
@@ -115,6 +115,7 @@ public class PocketStonecutter extends Item {
 	}
 
 	class PocketStonecutterTooltip implements ConvertibleTooltipData, TooltipComponent {
+		private final Identifier TOOLTIP = new Identifier("pockettools", "textures/gui/component/tooltip.png");
 		public List<StonecuttingRecipe> list = new ArrayList<>();
 		public ItemStack stack;
 
@@ -147,8 +148,6 @@ public class PocketStonecutter extends Item {
 			return 18 * 4 + 4;
 		}
 
-		private static final Identifier STONECUTTER_ICONS_TEXTURE = new Identifier("textures/gui/container/stonecutter.png");
-
 		@Override
 		public void drawItems(TextRenderer textRenderer, int x, int y, DrawContext context) {
 			NbtCompound nbt = stack.getOrCreateNbt();
@@ -165,18 +164,20 @@ public class PocketStonecutter extends Item {
 				for (StonecuttingRecipe recipe : list) {
 					ItemStack output = recipe.getOutput(MinecraftClient.getInstance().world.getRegistryManager());
 
+					if (offset == i) {
+						context.drawTexture(TOOLTIP, sx + 1, sy + 1, 26, 18, 18, 18, 256, 256);
+					} else {
+						context.drawTexture(TOOLTIP, sx + 1, sy + 1, 0, 0, 18, 18, 256, 256);
+					}
 					context.drawItem(output, sx + 2, sy + 2);
 					context.drawItemInSlot(textRenderer, output, sx + 2, sy + 2);
 
 					context.setShaderColor(1.f, 1.f, 1.f, 1.f);
 
-					float v = i == offset ? 184.f : 166.f;
-					context.drawTexture(STONECUTTER_ICONS_TEXTURE, sx + 2, sy + 1, 0.f, v, 18, 18, 256, 256);
-
-					sx += 16;
+					sx += 18;
 					if (sx >= maxX) {
 						sx = x;
-						sy += 16;
+						sy += 18;
 					}
 
 					i++;

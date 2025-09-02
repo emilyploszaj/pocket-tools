@@ -1,5 +1,8 @@
 package dev.emi.pockettools.item;
 
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.ExperienceOrbEntity;
@@ -13,10 +16,6 @@ import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ClickType;
 import net.minecraft.world.World;
-
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 public class PocketGrindstone extends Item {
 
@@ -45,7 +44,7 @@ public class PocketGrindstone extends Item {
 
 		Map<Enchantment, Integer> map = EnchantmentHelper.get(copy).entrySet().stream()
 				.filter(entry -> entry.getKey().isCursed())
-				.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 		EnchantmentHelper.set(map, stack);
 		stack.setRepairCost(0);
 		if (stack.isOf(Items.ENCHANTED_BOOK) && map.isEmpty()) {
@@ -65,9 +64,9 @@ public class PocketGrindstone extends Item {
 		int i = 0;
 		Map<Enchantment, Integer> map = EnchantmentHelper.get(stack);
 
-		for (Entry entry : map.entrySet()) {
-			Enchantment enchantment = (Enchantment) entry.getKey();
-			Integer integer = (Integer) entry.getValue();
+		for (Map.Entry<Enchantment, Integer> entry : map.entrySet()) {
+			Enchantment enchantment = entry.getKey();
+			Integer integer = entry.getValue();
 			if (!enchantment.isCursed()) {
 				i += enchantment.getMinPower(integer);
 			}

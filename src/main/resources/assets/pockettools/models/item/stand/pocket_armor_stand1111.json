@@ -5,6 +5,10 @@
 		"layer1": "pockettools:item/pocket_armor_stand_boots",
 		"layer2": "pockettools:item/pocket_armor_stand_leggings",
 		"layer3": "pockettools:item/pocket_armor_stand_chestplate",
-		"layer4": "pockettools:item/pocket_armor_stand_helmet"
+		"layer4": "pockettools:item/pocket_armor_stand_helmet",
+		"layer5": "pockettools:item/pocket_armor_stand_boots_trim",
+		"layer6": "pockettools:item/pocket_armor_stand_leggings_trim",
+		"layer7": "pockettools:item/pocket_armor_stand_chestplate_trim",
+		"layer8": "pockettools:item/pocket_armor_stand_helmet_trim"
 	}
 }

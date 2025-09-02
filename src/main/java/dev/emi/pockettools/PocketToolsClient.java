@@ -1,15 +1,31 @@
 package dev.emi.pockettools;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import dev.emi.pockettools.item.PocketCactus;
 import dev.emi.pockettools.tooltip.ConvertibleTooltipData;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.TooltipComponentCallback;
-import net.minecraft.item.*;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.item.ModelPredicateProviderRegistry;
+import net.minecraft.client.render.model.json.ItemModelGenerator;
+import net.minecraft.item.ArmorItem;
+import net.minecraft.item.ArmorMaterial;
+import net.minecraft.item.ArmorMaterials;
+import net.minecraft.item.DyeableArmorItem;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.item.trim.ArmorTrim;
+import net.minecraft.item.trim.ArmorTrimMaterial;
+import net.minecraft.item.trim.ArmorTrimMaterials;
+import net.minecraft.recipe.Ingredient;
+import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.text.TextColor;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ColorHelper;
-import net.minecraft.util.math.MathHelper;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class PocketToolsClient implements ClientModInitializer {
 	// TODO Make this stuff data driven so I can feel better about hard coding it instead of generating
@@ -18,6 +34,9 @@ public class PocketToolsClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
+		while (ItemModelGenerator.LAYERS.size() < 9) {
+			ItemModelGenerator.LAYERS.add("layer" + ItemModelGenerator.LAYERS.size());
+		}
 		ARMOR_COLORS.put(ArmorMaterials.LEATHER, ColorHelper.Argb.getArgb(255, 112, 71, 45));
 		ARMOR_COLORS.put(ArmorMaterials.IRON, ColorHelper.Argb.getArgb(255, 198, 198, 198));
 		ARMOR_COLORS.put(ArmorMaterials.CHAIN, ColorHelper.Argb.getArgb(255, 150, 150, 150));
@@ -36,39 +55,44 @@ public class PocketToolsClient implements ClientModInitializer {
 		ColorProviderRegistry.ITEM.register((stack, tintIndex) -> {
 			var nbt = stack.getOrCreateNbt();
 			ItemStack armor = null;
-			if (tintIndex == 1) {
+			int a = -1;
+			if (tintIndex > 0) {
+				a = (tintIndex - 1) % 4 + 1;
+			}
+			if (a == 1) {
 				if (nbt.contains("feet")) {
 					armor = ItemStack.fromNbt(nbt.getCompound("feet"));
 				}
-			} else if (tintIndex == 2) {
+			} else if (a == 2) {
 				if (nbt.contains("legs")) {
 					armor = ItemStack.fromNbt(nbt.getCompound("legs"));
 				}
-			} else if (tintIndex == 3) {
+			} else if (a == 3) {
 				if (nbt.contains("chest")) {
 					armor = ItemStack.fromNbt(nbt.getCompound("chest"));
 				}
-			} else if (tintIndex == 4) {
+			} else if (a == 4) {
 				if (nbt.contains("head")) {
 					armor = ItemStack.fromNbt(nbt.getCompound("head"));
 				}
 			}
 			if (armor != null) {
-				if (ITEM_COLORS.containsKey(armor.getItem())) {
-					return ITEM_COLORS.get(armor.getItem());
-				}
-				if (armor.getItem() instanceof ArmorItem item) {
-					ArmorMaterial material = item.getMaterial();
-					if (item instanceof DyeableArmorItem dye) {
-						if (dye.hasColor(armor)) {
-							return dye.getColor(armor);
-						}
+				if (tintIndex > 4) {
+					MinecraftClient client = MinecraftClient.getInstance();
+					ArmorTrim trim = ArmorTrim.getTrim(client.world.getRegistryManager(), armor).orElse(null);
+					if (trim != null) {
+						TextColor color = trim.getMaterial().value().description().getStyle().getColor();
+						return color.getRgb();
 					}
-					return ARMOR_COLORS.getOrDefault(material, -1);
 				}
+				return getTintFor(armor);
 			}
 			return -1;
 		}, PocketToolsMain.POCKET_ARMOR_STAND);
+		ModelPredicateProviderRegistry.register(PocketToolsMain.POCKET_CACTUS, new Identifier("pockettools", "friend"), (stack, world, entity, i) -> {
+			PocketCactus.State state = new PocketCactus.State(stack);
+			return state.friend() ? (1 + state.color()) * 0.01f + 0.005f : 0;
+		});
 
 		TooltipComponentCallback.EVENT.register(data -> {
 			if (data instanceof ConvertibleTooltipData convertible) {
@@ -77,5 +101,35 @@ public class PocketToolsClient implements ClientModInitializer {
 
 			return null;
 		});
+	}
+
+	public int getTintFor(ItemStack armor) {
+		MinecraftClient client = MinecraftClient.getInstance();
+		DynamicRegistryManager reg = client.world.getRegistryManager();
+		if (ITEM_COLORS.containsKey(armor.getItem())) {
+			return ITEM_COLORS.get(armor.getItem());
+		}
+		if (armor.getItem() instanceof ArmorItem item) {
+			ArmorMaterial material = item.getMaterial();
+			Ingredient repair = material.getRepairIngredient();
+			if (item instanceof DyeableArmorItem dye) {
+				if (dye.hasColor(armor)) {
+					return dye.getColor(armor);
+				}
+			}
+			for (ItemStack stack : repair.getMatchingStacks()) {
+				ArmorTrimMaterial trim = ArmorTrimMaterials.get(reg, stack).map(r -> r.value()).orElse(null);
+				if (trim != null) {
+					return getTrimMaterialColor(trim);
+				}
+			}
+			return ARMOR_COLORS.getOrDefault(material, -1);
+		}
+		return -1;
+	}
+
+	public int getTrimMaterialColor(ArmorTrimMaterial mat) {
+		TextColor color = mat.description().getStyle().getColor();
+		return color.getRgb();
 	}
 }

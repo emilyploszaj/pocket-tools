@@ -3,7 +3,9 @@
   "package": "dev.emi.pockettools.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
+    "accessor.HandledScreenAccessor",
     "ItemEntityMixin",
+    "HandledScreenMixin",
     "SlotMixin"
   ],
   "injectors": {

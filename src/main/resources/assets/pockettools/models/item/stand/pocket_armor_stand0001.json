@@ -5,6 +5,10 @@
 		"layer1": "pockettools:item/empty",
 		"layer2": "pockettools:item/empty",
 		"layer3": "pockettools:item/empty",
-		"layer4": "pockettools:item/pocket_armor_stand_helmet"
+		"layer4": "pockettools:item/pocket_armor_stand_helmet",
+		"layer5": "pockettools:item/empty",
+		"layer6": "pockettools:item/empty",
+		"layer7": "pockettools:item/empty",
+		"layer8": "pockettools:item/pocket_armor_stand_helmet_trim"
 	}
 }

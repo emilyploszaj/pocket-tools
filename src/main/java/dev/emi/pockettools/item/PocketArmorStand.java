@@ -1,13 +1,15 @@
 package dev.emi.pockettools.item;
 
+import java.util.List;
+import java.util.Optional;
+
+import com.google.common.collect.Lists;
+
 import dev.emi.pockettools.tooltip.ConvertibleTooltipData;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.item.TooltipData;
-import net.minecraft.client.render.item.ItemRenderer;
-import net.minecraft.client.texture.TextureManager;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -22,10 +24,8 @@ import net.minecraft.screen.slot.Slot;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.ClickType;
+import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
-
-import java.util.ArrayList;
-import java.util.Optional;
 
 public class PocketArmorStand extends Item {
 
@@ -39,7 +39,7 @@ public class PocketArmorStand extends Item {
 		NbtCompound nbt = self.getOrCreateNbt();
 		if (clickType == ClickType.RIGHT) {
 			if (otherStack.isEmpty()) {
-				dumpArmor(nbt, player.getInventory());
+				dumpArmor(self, nbt, player.getInventory());
 				if (world.isClient) {
 					world.playSound(player, player.getBlockPos(), SoundEvents.ITEM_ARMOR_EQUIP_GENERIC, SoundCategory.PLAYERS, 1.0f, 1.0f);
 				}
@@ -118,31 +118,45 @@ public class PocketArmorStand extends Item {
 		return inner;
 	}
 
-	private void dumpArmor(NbtCompound tag, PlayerInventory playerInventory) {
-		ArrayList stacks = new ArrayList<ItemStack>();
-		if (tag.contains("head")) {
-			stacks.add(ItemStack.fromNbt(tag.getCompound("head")));
-			tag.remove("head");
-		}
-		if (tag.contains("chest")) {
-			stacks.add(ItemStack.fromNbt(tag.getCompound("chest")));
-			tag.remove("chest");
-		}
-		if (tag.contains("legs")) {
-			stacks.add(ItemStack.fromNbt(tag.getCompound("legs")));
-			tag.remove("legs");
-		}
-		if (tag.contains("feet")) {
-			stacks.add(ItemStack.fromNbt(tag.getCompound("feet")));
-			tag.remove("feet");
-		}
+	private void dumpArmor(ItemStack stack, NbtCompound tag, PlayerInventory playerInventory) {
+		List<ItemStack> stacks = getArmorInventory(stack);
+		tag.remove("head");
+		tag.remove("chest");
+		tag.remove("legs");
+		tag.remove("feet");
 		tag.remove("CustomModelData");
 		for (Object s : stacks) {
 			playerInventory.offerOrDrop((ItemStack) s);
 		}
 	}
 
+	public static List<ItemStack> getArmorInventory(ItemStack stack) {
+		List<ItemStack> list = Lists.newArrayList();
+		list.add(ItemStack.EMPTY);
+		list.add(ItemStack.EMPTY);
+		list.add(ItemStack.EMPTY);
+		list.add(ItemStack.EMPTY);
+		if (!stack.hasNbt()) {
+			return list;
+		}
+		NbtCompound tag = stack.getNbt();
+		if (tag.contains("head")) {
+			list.set(0, ItemStack.fromNbt(tag.getCompound("head")));
+		}
+		if (tag.contains("chest")) {
+			list.set(1, ItemStack.fromNbt(tag.getCompound("chest")));
+		}
+		if (tag.contains("legs")) {
+			list.set(2, ItemStack.fromNbt(tag.getCompound("legs")));
+		}
+		if (tag.contains("feet")) {
+			list.set(3, ItemStack.fromNbt(tag.getCompound("feet")));
+		}
+		return list;
+	}
+
 	static class PocketArmorStandTooltip implements ConvertibleTooltipData, TooltipComponent {
+		private final Identifier TOOLTIP = new Identifier("pockettools", "textures/gui/component/tooltip.png");
 		public ItemStack stack;
 
 		public PocketArmorStandTooltip(ItemStack stack) {
@@ -166,22 +180,15 @@ public class PocketArmorStand extends Item {
 
 		@Override
 		public void drawItems(TextRenderer textRenderer, int x, int y, DrawContext context) {
-			NbtCompound nbt = stack.getOrCreateNbt();
-			if (nbt.contains("head")) {
-				ItemStack stack = ItemStack.fromNbt(nbt.getCompound("head"));
-				this.renderGuiItem(context, textRenderer, stack, x + 2, y + 2);
-			}
-			if (nbt.contains("chest")) {
-				ItemStack stack = ItemStack.fromNbt(nbt.getCompound("chest"));
-				this.renderGuiItem(context, textRenderer, stack, x + 18, y + 2);
-			}
-			if (nbt.contains("legs")) {
-				ItemStack stack = ItemStack.fromNbt(nbt.getCompound("legs"));
-				this.renderGuiItem(context, textRenderer, stack, x + 34, y + 2);
-			}
-			if (nbt.contains("feet")) {
-				ItemStack stack = ItemStack.fromNbt(nbt.getCompound("feet"));
-				this.renderGuiItem(context, textRenderer, stack, x + 50, y + 2);
+			context.setShaderColor(1.f, 1.f, 1.f, 1.f);
+			List<ItemStack> stacks = getArmorInventory(stack);
+			for (int i = 0; i < 4; i++) {
+				if (stacks.get(i).isEmpty()) {
+					context.drawTexture(TOOLTIP, x + 1 + (18 * i), y + 1, 18 * (2 + i), 0, 18, 18, 256, 256);
+				} else {
+					this.renderGuiItem(context, textRenderer, stacks.get(i), x + 2 + (18 * i), y + 2);
+					context.drawTexture(TOOLTIP, x + 1 + (18 * i), y + 1, 0, 0, 18, 18, 256, 256);
+				}
 			}
 		}
 

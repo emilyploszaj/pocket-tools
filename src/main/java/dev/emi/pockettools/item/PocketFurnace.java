@@ -1,5 +1,6 @@
 package dev.emi.pockettools.item;
 
+import dev.emi.pockettools.particle.GuiParticleHolder;
 import dev.emi.pockettools.tooltip.ConvertibleTooltipData;
 import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.client.font.TextRenderer;
@@ -12,6 +13,7 @@ import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.inventory.StackReference;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.recipe.AbstractCookingRecipe;
 import net.minecraft.recipe.RecipeType;
@@ -69,8 +71,13 @@ public class PocketFurnace<T extends AbstractCookingRecipe> extends Item {
 	 */
 	@Override
 	public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+		NbtCompound nbt = stack.getOrCreateNbt();
+		if (world.isClient) {
+			if (nbt.getInt("fuelTime") > 0 && world.getRandom().nextInt(33) == 0) {
+				GuiParticleHolder.addFlame(stack);
+			}
+		}
 		if (!world.isClient()) {
-			NbtCompound nbt = stack.getOrCreateNbt();
 			ItemStack input = ItemStack.EMPTY;
 			ItemStack fuel = ItemStack.EMPTY;
 			ItemStack output = ItemStack.EMPTY;
@@ -95,17 +102,29 @@ public class PocketFurnace<T extends AbstractCookingRecipe> extends Item {
 			if (nbt.contains("CustomModelData")) {
 				customModelData = nbt.getInt("CustomModelData");
 			}
+			if (fuelTime > 0) {
+				fuelTime--;
+				nbt.putInt("fuelTime", fuelTime);
+				if (world.isClient && world.getRandom().nextInt(33) == 0) {
+					System.out.println("e");
+					GuiParticleHolder.addFlame(stack);
+				}
+			}
 			if (cookTime > 0) {
-				if (fuelTime > 0) {
-					fuelTime--;
-					nbt.putInt("fuelTime", fuelTime);
+				if (input.isEmpty()) {
+					nbt.putInt("cookTime", 0);
+					return;
 				}
 				if (fuelTime == 0) {
 					if (fuel.getCount() > 0) {
 						fuelTime = AbstractFurnaceBlockEntity.createFuelTimeMap().getOrDefault(fuel.getItem(), 0);
 						nbt.putInt("fuelTime", fuelTime);
 						nbt.putInt("maxFuelTime", fuelTime);
-						fuel.decrement(1);
+						if (fuel.getItem() == Items.LAVA_BUCKET) {
+							fuel = Items.BUCKET.getDefaultStack();
+						} else {
+							fuel.decrement(1);
+						}
 						nbt.put("fuel", fuel.writeNbt(new NbtCompound()));
 					} else {
 						return;
@@ -134,10 +153,6 @@ public class PocketFurnace<T extends AbstractCookingRecipe> extends Item {
 				}
 				nbt.putInt("cookTime", cookTime);
 			} else {
-				if (fuelTime > 0) {
-					fuelTime--;
-					nbt.putInt("fuelTime", fuelTime);
-				}
 				if (output.getCount() < output.getMaxCount() && input.getCount() > 0) {
 					Optional<T> recipe = world.getRecipeManager().getFirstMatch(type,
 							new SimpleInventory(input), world);
@@ -163,9 +178,27 @@ public class PocketFurnace<T extends AbstractCookingRecipe> extends Item {
 			if (applied.isEmpty()) {
 				if (nbt.contains("output")) {
 					ItemStack output = ItemStack.fromNbt(nbt.getCompound("output"));
-					cursor.set(output.copy());
-					nbt.remove("output");
-					return true;
+					if (!output.isEmpty()) {
+						cursor.set(output.copy());
+						nbt.remove("output");
+						return true;
+					}
+				}
+				if (nbt.contains("input")) {
+					ItemStack input = ItemStack.fromNbt(nbt.getCompound("input"));
+					if (!input.isEmpty()) {
+						cursor.set(input.copy());
+						nbt.remove("input");
+						return true;
+					}
+				}
+				if (nbt.contains("fuel")) {
+					ItemStack fuel = ItemStack.fromNbt(nbt.getCompound("fuel"));
+					if (!fuel.isEmpty()) {
+						cursor.set(fuel.copy());
+						nbt.remove("fuel");
+						return true;
+					}
 				}
 			}
 			ItemStack input = ItemStack.EMPTY;
@@ -227,6 +260,7 @@ public class PocketFurnace<T extends AbstractCookingRecipe> extends Item {
 	}
 
 	static class PocketFurnaceTooltip implements ConvertibleTooltipData, TooltipComponent {
+		private final Identifier TOOLTIP = new Identifier("pockettools", "textures/gui/component/tooltip.png");
 		private final Identifier FURNACE = new Identifier("pockettools", "textures/gui/component/furnace.png");
 		public ItemStack stack;
 
@@ -246,7 +280,7 @@ public class PocketFurnace<T extends AbstractCookingRecipe> extends Item {
 
 		@Override
 		public int getWidth(TextRenderer textRenderer) {
-			return 66;
+			return 73;
 		}
 
 		@Override
@@ -280,10 +314,12 @@ public class PocketFurnace<T extends AbstractCookingRecipe> extends Item {
 			if (nbt.contains("maxCookTime")) {
 				maxCookTime = nbt.getInt("maxCookTime");
 			}
-			this.renderGuiItem(context, textRenderer, input, x + 2, y + 1);
-			this.renderGuiItem(context, textRenderer, output, x + 48, y + 2);
-			this.renderGuiItem(context, textRenderer, fuel, x + 2, y + 20);
 			context.setShaderColor(1.f, 1.f, 1.f, 1.f);
+			context.drawTexture(TOOLTIP, x + 1, y, 0, 0, 18, 18, 256, 256); // Input
+			context.drawTexture(TOOLTIP, x + 47, y, 0, 18, 26, 26, 256, 256); // Output
+			context.drawTexture(TOOLTIP, x + 1, y + 19, 18, 0, 18, 18, 256, 256); // Fuel
+
+			context.drawTexture(TOOLTIP, x + 22, y + 3, 0, 44, 22, 15, 256, 256); // Arrow
 			if (maxFuelTime > 0) {
 				int fuelProgress = fuelTime * 13 / maxFuelTime;
 				context.drawTexture(FURNACE, x + 26, y + 36 - fuelProgress, 0, 13 - fuelProgress, 13, fuelProgress + 1, 256, 256);
@@ -292,6 +328,9 @@ public class PocketFurnace<T extends AbstractCookingRecipe> extends Item {
 				int cookProgress = 22 - (cookTime * 22 / maxCookTime);
 				context.drawTexture(FURNACE, x + 22, y + 3, 0, 13, cookProgress, 15, 256, 256);
 			}
+			this.renderGuiItem(context, textRenderer, input, x + 2, y + 1);
+			this.renderGuiItem(context, textRenderer, output, x + 52, y + 5);
+			this.renderGuiItem(context, textRenderer, fuel, x + 2, y + 20);
 		}
 
 		private void renderGuiItem(DrawContext context, TextRenderer textRenderer, ItemStack stack, int x, int y) {

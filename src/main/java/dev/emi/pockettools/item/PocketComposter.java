@@ -1,6 +1,13 @@
 package dev.emi.pockettools.item;
 
+import java.util.Optional;
+
+import dev.emi.pockettools.tooltip.ConvertibleTooltipData;
 import net.minecraft.block.ComposterBlock;
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.tooltip.TooltipComponent;
+import net.minecraft.client.item.TooltipData;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.StackReference;
@@ -12,6 +19,7 @@ import net.minecraft.screen.slot.Slot;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.ClickType;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
@@ -118,5 +126,51 @@ public class PocketComposter extends Item {
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public Optional<TooltipData> getTooltipData(ItemStack stack) {
+		return Optional.of(new PocketComposterTooltip(stack));
+	}
+
+	static class PocketComposterTooltip implements ConvertibleTooltipData, TooltipComponent {
+		private final Identifier TOOLTIP = new Identifier("pockettools", "textures/gui/component/tooltip.png");
+		public ItemStack stack;
+
+		public PocketComposterTooltip(ItemStack stack) {
+			this.stack = stack;
+		}
+
+		@Override
+		public TooltipComponent getComponent() {
+			return this;
+		}
+
+		@Override
+		public int getHeight() {
+			return 19;
+		}
+
+		@Override
+		public int getWidth(TextRenderer textRenderer) {
+			return 18;
+		}
+
+		@Override
+		public void drawItems(TextRenderer textRenderer, int x, int y, DrawContext context) {
+			context.setShaderColor(1.f, 1.f, 1.f, 1.f);
+			context.drawTexture(TOOLTIP, x, y, 18 * 6, 0, 18, 18, 256, 256);
+			NbtCompound tag = stack.getNbt();
+			ItemStack meal = ItemStack.EMPTY;
+			if (tag.getInt("fill") == 8) {
+				meal = Items.BONE_MEAL.getDefaultStack();
+			}
+			renderGuiItem(context, textRenderer, meal, x + 1, y + 1);
+		}
+
+		private void renderGuiItem(DrawContext context, TextRenderer textRenderer, ItemStack stack, int x, int y) {
+			context.drawItem(stack, x, y);
+			context.drawItemInSlot(textRenderer, stack, x, y);
+		}
 	}
 }
